@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://levels/Test.cs" type="Script" id=2]
+[ext_resource path="res://levels/KinematicsTest.cs" type="Script" id=2]
 
-[node name="Test" type="Node2D"]
+[node name="KinematicsTest" type="Node2D"]
 script = ExtResource( 2 )
 
 [node name="PrevButton" type="Button" parent="."]

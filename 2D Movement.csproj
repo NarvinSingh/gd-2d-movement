@@ -58,10 +58,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="levels\AutoLoad.cs" />
-    <Compile Include="levels\Test.cs" />
+    <Compile Include="levels\KinematicsTest.cs" />
     <Compile Include="nodes\Graph.cs" />
-    <Compile Include="lib\Kinematics.test.cs" />
     <Compile Include="lib\Kinematics.cs" />
     <Compile Include="nodes\PolygonOutline2D.cs" />
     <Compile Include="characters\PlayerTopDown.cs" />

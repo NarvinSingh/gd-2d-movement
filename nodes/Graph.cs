@@ -4,9 +4,9 @@ using Physics;
 
 public class Graph : Control
 {
-    private String title;
-    private String xAxis;
-    private String yAxis;
+    private string title;
+    private string xAxis;
+    private string yAxis;
     private Label titleLabel;
     private Line2D xLine;
     private Label xLabel;
@@ -21,7 +21,7 @@ public class Graph : Control
     private Vector2 origin;
     private PackedScene point;
 
-    [Export] public String Title
+    [Export] public string Title
     {
         get
         {
@@ -34,7 +34,7 @@ public class Graph : Control
         }
     }
 
-    [Export] public String XAxis
+    [Export] public string XAxis
     {
         get
         {
@@ -47,7 +47,7 @@ public class Graph : Control
         }
     }
 
-    [Export] public String YAxis
+    [Export] public string YAxis
     {
         get
         {
@@ -88,32 +88,6 @@ public class Graph : Control
         yLabel.Text = yAxis;
 
         Run();
-        // Run(0, 100);
-        // Run("Negative Acceleration, No Drag", 0, -100);
-        // Run("Positive Velocity, Positive Acceleration, No Drag", 250, 100);
-        // Run(250, -100);
-        // Run("Negative Velocity, Positive Acceleration, No Drag", -600, 100);
-        // Run(100);
-        // Run(0);
-        // Run(-100);
-        // Run(-250, 100);
-        // Run(250, -100);
-        // Run(0, 100, 0.01);
-        // Run(200, 100, 0.01);
-        // Run(200, -100, 0.01, Kinematics.StopTime(200, -100, 0.01));
-        // Run(200, -100, 0.01, 2);
-    }
-
-    private Vector2 Map(float x, float y, float xScale, float yScale, float yOffset)
-    {
-        return new Vector2(origin.x + x * xScale, origin.y - (y - yOffset) * yScale);
-    }
-
-    private void Plot(float x, float y, float xScale, float yScale, float yOffset)
-    {
-        Sprite newPoint = (Sprite)point.Instance();
-        newPoint.Position = Map(x, y, xScale, yScale, yOffset);
-        AddChild(newPoint);
     }
 
     private void Plot(float x, float y)
@@ -121,193 +95,6 @@ public class Graph : Control
         Sprite newPoint = (Sprite)point.Instance();
         newPoint.Position = new Vector2(x, y);
         AddChild(newPoint);
-    }
-
-    private void Run1(double v0, double a = 0, double d = 0, double t = 5.0, double dt = 1.0 / 60)
-    {
-        int frames = (int)(t / dt) + 1;
-        double v = v0;
-        double vMin = v0;
-        double vMax = v0;
-        double[] vs = new double[frames];
-
-        vs[0] = v0;
-
-        for (int i = 1; i < frames; i++)
-        {
-            v = Kinematics.Velocity(v, dt, a, d);
-            vs[i] = v;
-            if (v < vMin) vMin = v;
-            else if (v > vMax) vMax = v;
-        }
-
-        float xScale = xAxisLen / frames;
-        float yScale = vMax > vMin ? yAxisLen / (float)(vMax - vMin) : yAxisLen / (float)vMax;
-        float yOffset = vMin != vMax ? (float)vMin : 0;
-
-        if (vMin < 0)
-        {
-            xLine.Translate(new Vector2(0, (float)vMin));
-        }
-
-        xMaxLabel.Text = String.Format("{0:F2}", t);
-        yMinLabel.Text = String.Format("{0:F2}", vMin != vMax ? vMin : 0);
-        yMaxLabel.Text = String.Format("{0:F2}", vMax);
-
-        for (int i = 0; i < frames; i++)
-        {
-            Plot(i, (float)vs[i], xScale, yScale, yOffset);
-        }
-    }
-
-    private void Run2(double v0, double a = 0, double d = 0, double t = 5.0, double dt = 1.0 / 60)
-    {
-        int frames = (int)(t / dt) + 1;
-        double v = v0;
-        double vMin = v0;
-        double vMax = v0;
-        double[] vs = new double[frames];
-
-        vs[0] = v0;
-
-        for (int i = 1; i < frames; i++)
-        {
-            v = Kinematics.Velocity(v, dt, a, d);
-            vs[i] = v;
-            if (v < vMin) vMin = v;
-            else if (v > vMax) vMax = v;
-        }
-
-        float xScale = xAxisLen / frames;
-        float yScale;
-        float yOffset;
-        float yMinValue;
-        float yMaxValue;
-
-        if (vMax != vMin)
-        {
-            yScale = yAxisLen / (float)Math.Abs(vMax - vMin);
-            yOffset = (float)vMin;
-            yMinValue = (float)vMin;
-            yMaxValue = (float)vMax;
-        }
-        else
-        {
-            if (vMax != 0)
-            {
-                yScale = yAxisLen / (float)Math.Abs(vMax);
-                yMaxValue = (float)vMax;
-            }
-            else
-            {
-                yScale = 1;
-                yMaxValue = 1;
-            }
-
-            yOffset = 0;
-            yMinValue = 0;
-        }
-
-        if (vMin < 0)
-        {
-            xLine.Translate(new Vector2(0, (float)vMin));
-        }
-
-        xMaxLabel.Text = String.Format("{0:F2}", t);
-        yMinLabel.Text = String.Format("{0:F2}", yMinValue);
-        yMaxLabel.Text = String.Format("{0:F2}", yMaxValue);
-
-        for (int i = 0; i < frames; i++)
-        {
-            Plot(i, (float)vs[i], xScale, yScale, yOffset);
-        }
-    }
-
-    private void Run(
-            double v0 = 0, double a = 0, double d = 0, double t = 5.0, double dt = 1.0 / 60, String title = null)
-    {
-        int frames = (int)(t / dt) + 1;
-        double v = v0;
-        double vMin = v0;
-        double vMax = v0;
-        double[] vs = new double[frames];
-
-        vs[0] = v0;
-
-        for (int i = 1; i < frames; i++)
-        {
-            v = Kinematics.Velocity(v, dt, a, d);
-            vs[i] = v;
-            if (v < vMin) vMin = v;
-            else if (v > vMax) vMax = v;
-        }
-
-        float xScale = xAxisLen / frames;
-        float yScale;
-        float yOffset;
-        float yMinValue;
-        float yMaxValue;
-
-        if (vMax != vMin)
-        {
-            yScale = yAxisLen / (float)Math.Abs(vMax - vMin);
-            yOffset = (float)vMin;
-            yMinValue = (float)vMin;
-            yMaxValue = (float)vMax;
-        }
-        else
-        {
-            if (vMax != 0)
-            {
-                yScale = yAxisLen / (float)Math.Abs(vMax);
-                yMaxValue = (float)vMax;
-            }
-            else
-            {
-                yScale = 1;
-                yMaxValue = 1;
-            }
-
-            yOffset = 0;
-            yMinValue = 0;
-        }
-
-        if (vMin < 0)
-        {
-            // xAxis.Translate(new Vector2(0, (float)vMin));
-        }
-
-        // this.title.Text = title ?? String.Format("v0 = {0:F2}, a = {1:F2}, d = {2:F2}", v0, a, d);
-        xMaxLabel.Text = String.Format("{0:F2}", t);
-        yMinLabel.Text = String.Format("{0:F2}", vMin);
-        yMaxLabel.Text = String.Format("{0:F2}", vMax);
-
-        if (vMin == vMax && vMin < 0) xLine.Translate(new Vector2(0, -yAxisLen));
-        else if (vMax < 0) xLine.Visible = false;
-        else if (vMin < 0) xLine.Translate(new Vector2(0, (float)vMin));
-        else if (vMin > 0) xLine.Visible = false;
-
-        for (int i = 0; i < frames; i++)
-        {
-            if (vMax != vMin)
-            {
-                Plot(
-                    origin.x + (float)(i * dt * xAxisLen / t),
-                    origin.y - (float)((vs[i] - vMin) * yAxisLen / (vMax - vMin)));
-            }
-            else if (vMax > 0)
-            {
-                Plot(
-                    origin.x + (float)(i * dt * xAxisLen / t),
-                    origin.y - yAxisLen);
-            }
-            else
-            {
-                Plot(
-                    origin.x + (float)(i * dt * xAxisLen / t),
-                    origin.y);
-            }
-        }
     }
 
     private void Run()

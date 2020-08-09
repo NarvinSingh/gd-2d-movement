@@ -54,7 +54,6 @@ public class PlayerTopDown : KinematicBody2D
         }
 
         velocity = Vector2.Zero;
-        KinematicsTest.WriteData();
         // GD.Print("KinematicsTest.ItAcceleratesNoDrag()", KinematicsTest.ItAcceleratesNoDrag());
         // GD.Print("KinematicsTest.ItDragsNoAcceleration()", KinematicsTest.ItDragsNoAcceleration());
     }

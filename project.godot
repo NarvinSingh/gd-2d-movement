@@ -16,7 +16,7 @@ _global_script_class_icons={
 [application]
 
 config/name="2D Movement"
-run/main_scene="res://levels/Test.tscn"
+run/main_scene="res://levels/KinematicsTest.tscn"
 config/icon="res://assets/godot_icon.png"
 
 [input]
