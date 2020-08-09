@@ -47,23 +47,16 @@
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <Reference Include="GodotSharp">
+      <HintPath>$(ProjectDir)\.mono\assemblies\$(ApiConfiguration)\GodotSharp.dll</HintPath>
       <Private>False</Private>
-      <HintPath>$(ProjectDir)/.mono/assemblies/$(ApiConfiguration)/GodotSharp.dll</HintPath>
     </Reference>
     <Reference Include="GodotSharpEditor" Condition=" '$(Configuration)' == 'Debug' ">
+      <HintPath>$(ProjectDir)\.mono\assemblies\$(ApiConfiguration)\GodotSharpEditor.dll</HintPath>
       <Private>False</Private>
-      <HintPath>$(ProjectDir)/.mono/assemblies/$(ApiConfiguration)/GodotSharpEditor.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="levels\AutoLoad.cs" />
-    <Compile Include="levels\Test.cs" />
-    <Compile Include="nodes\Graph.cs" />
-    <Compile Include="lib\Kinematics.test.cs" />
-    <Compile Include="lib\Kinematics.cs" />
-    <Compile Include="nodes\PolygonOutline2D.cs" />
     <Compile Include="characters\PlayerTopDown.cs" />
     <Compile Include="levels\TopDown.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

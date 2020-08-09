@@ -1,11 +1,18 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://characters/PlayerTopDown.tscn" type="PackedScene" id=1]
 [ext_resource path="res://levels/TopDown.cs" type="Script" id=2]
+[ext_resource path="res://assets/purple_sky.png" type="Texture" id=3]
 
 [node name="TopDown" type="Node2D"]
 script = ExtResource( 2 )
 
+[node name="Background" type="Sprite" parent="."]
+position = Vector2( -32000, -32000 )
+texture = ExtResource( 3 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 64000, 64000 )
+
 [node name="PlayerTopDown" parent="." instance=ExtResource( 1 )]
 position = Vector2( 512, 300 )
-Speed = 400.0

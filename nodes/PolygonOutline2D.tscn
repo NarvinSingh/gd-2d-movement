@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://nodes/PolygonOutline2D.cs" type="Script" id=1]
+
+[node name="PolygonOutline2D" type="Polygon2D"]
+script = ExtResource( 1 )
