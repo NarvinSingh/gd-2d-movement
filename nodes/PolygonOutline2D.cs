@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public class PolygonOutline2D : Polygon2D
 {
