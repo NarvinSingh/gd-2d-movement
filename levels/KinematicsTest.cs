@@ -415,11 +415,8 @@ public class KinematicsTest : Carousel
         for (int i = 1; i < frames; i++)
         {
             ts[i] = (float)(i * dt);
-            // vs[i] = (float)Kinematics.Velocity(vs[i - 1], dt, a, d);
             vs[i] = (float)Kinematics.Velocity(v0, ts[i], a, d);
         }
-
-        GD.Print(vs[150]);
 
         return new float[][] { ts, vs };
     }
