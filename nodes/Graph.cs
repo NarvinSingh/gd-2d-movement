@@ -1,13 +1,14 @@
 using Godot;
 using System;
-using Physics;
+using Graphing;
 
 public class Graph : Control
 {
     private string title;
-    private string xAxis;
-    private string yAxis;
+    private string xAxisLabel;
+    private string yAxisLabel;
     private Label titleLabel;
+    private Node2D xAxis;
     private Line2D xLine;
     private Label xLabel;
     private Label xMinLabel;
@@ -34,29 +35,29 @@ public class Graph : Control
         }
     }
 
-    [Export] public string XAxis
+    [Export] public string XAxisLabel
     {
         get
         {
-            return xAxis;
+            return xAxisLabel;
         }
         set
         {
-            xAxis = value;
-            if (!(xLabel is null)) xLabel.Text = xAxis;
+            xAxisLabel = value;
+            if (!(xLabel is null)) xLabel.Text = xAxisLabel;
         }
     }
 
-    [Export] public string YAxis
+    [Export] public string YAxisLabel
     {
         get
         {
-            return yAxis;
+            return yAxisLabel;
         }
         set
         {
-            yAxis = value;
-            if (!(yLabel is null)) yLabel.Text = yAxis;
+            yAxisLabel = value;
+            if (!(yLabel is null)) yLabel.Text = yAxisLabel;
         }
     }
 
@@ -67,6 +68,7 @@ public class Graph : Control
     {
         // Child nodes
         titleLabel = (Label)GetNode("Title");
+        xAxis = (Node2D)GetNode("XAxis");
         xLine = (Line2D)GetNode("XAxis/Axis");
         xLabel = (Label)GetNode("XAxis/Label");
         xMinLabel = (Label)GetNode("XAxis/Min");
@@ -84,63 +86,62 @@ public class Graph : Control
 
         // Initialize child nodes
         titleLabel.Text = title;
-        xLabel.Text = xAxis;
-        yLabel.Text = yAxis;
+        xLabel.Text = xAxisLabel;
+        yLabel.Text = yAxisLabel;
+        xMinLabel.Visible = false;
 
-        Run();
+        Plot();
     }
 
-    private void Plot(float x, float y)
+    private void CreatePoint(float x, float y)
     {
-        Sprite newPoint = (Sprite)point.Instance();
-        newPoint.Position = new Vector2(x, y);
-        AddChild(newPoint);
+            Sprite newPoint = (Sprite)point.Instance();
+            newPoint.Position = new Vector2(x, y);
+            AddChild(newPoint);
     }
 
-    private void Run()
+    private void Plot()
     {
         int frames = XSeries.Length;
-        float xMin = XSeries[0];
-        float xMax = XSeries[XSeries.Length - 1];
-        float yMin = YSeries[0];
-        float yMax = YSeries[0];
+        Plot.MinMax xMinMax = new Plot.MinMax(XSeries[0], XSeries[XSeries.Length - 1]);
+        Plot.MinMax yMinMax = Graphing.Plot.GetMinMax(YSeries);
+        float yLowerExtent;
+        float yUpperExtent;
 
-        foreach (float y in YSeries)
+        if (yMinMax.Min != yMinMax.Max)
         {
-            if (y < yMin) yMin = y;
-            else if (y > yMax) yMax = y;
+            yLowerExtent = Math.Min((float)Graphing.Plot.GetAxisLowerExtent(yMinMax.Min), 0);
+            yUpperExtent = Math.Max((float)Graphing.Plot.GetAxisUpperExtent(yMinMax.Max), 0);
         }
-
-        xMinLabel.Text = String.Format("{0:F2}", xMin);
-        xMaxLabel.Text = String.Format("{0:F2}", xMax);
-        yMinLabel.Text = String.Format("{0:F2}", yMin);
-        yMaxLabel.Text = String.Format("{0:F2}", yMax);
-
-        if (yMin == yMax && yMin < 0) xLine.Translate(new Vector2(0, -yAxisLen));
-        else if (yMax < 0) xLine.Visible = false;
-        else if (yMin < 0) xLine.Translate(new Vector2(0, yMin));
-        else if (yMin > 0) xLine.Visible = false;
-
-        for (int i = 0; i < frames; i++)
+        else
         {
-            if (yMax != yMin)
+            if (yMinMax.Min == 0)
             {
-                Plot(
-                    origin.x + (XSeries[i] * xAxisLen / xMax),
-                    origin.y - (YSeries[i] - yMin) * yAxisLen / (yMax - yMin));
+                yLowerExtent = 0;
+                yUpperExtent = 1;
             }
-            else if (yMax > 0)
+            else if (yMinMax.Min > 0)
             {
-                Plot(
-                    origin.x + (XSeries[i] * xAxisLen / xMax),
-                    origin.y - yAxisLen);
+                yLowerExtent = (float)yMinMax.Min * 2;
+                yUpperExtent = 0;
             }
             else
             {
-                Plot(
-                    origin.x + (XSeries[i] * xAxisLen / xMax),
-                    origin.y);
+                yLowerExtent = 0;
+                yUpperExtent = (float)yMinMax.Min * 2;
             }
+        }
+
+        xMaxLabel.Text = String.Format("{0:F2}", xMinMax.Max);
+        yMinLabel.Text = String.Format("{0:F2}", yLowerExtent);
+        yMaxLabel.Text = String.Format("{0:F2}", yUpperExtent);
+
+        if (yLowerExtent != 0) xAxis.Translate(new Vector2(0, yLowerExtent * yAxisLen / (yUpperExtent - yLowerExtent)));
+
+        for (int i = 0; i < frames; i++)
+        {
+            CreatePoint((float)Graphing.Plot.TranslateX(XSeries[i], origin.x, xAxisLen, 0, 5),
+                    (float)Graphing.Plot.TranslateY(YSeries[i], origin.y, yAxisLen, yLowerExtent, yUpperExtent));
         }
     }
 }

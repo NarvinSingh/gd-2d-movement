@@ -10,8 +10,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 Title = "Title"
-XAxis = "Time"
-YAxis = "Velocity"
 
 [node name="Title" type="Label" parent="."]
 anchor_left = 0.5
