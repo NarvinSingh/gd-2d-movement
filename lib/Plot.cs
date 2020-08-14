@@ -93,6 +93,42 @@ namespace Graphing
             return Translate(value, screenZero, axisLength, axisLowerExtent, axisUpperExtent, isIncInverted);
         }
 
+        public static double Untranslate(
+                double value, double screenZero, double axisLength, double axisLowerExtent, double axisUpperExtent,
+                bool isIncInverted)
+        {
+            if (axisLength < 0) throw new ArgumentOutOfRangeException("axisLength must be greater than zero.");
+            if (axisLowerExtent >= axisUpperExtent)
+            {
+                throw new ArgumentOutOfRangeException("axisLowerExtent must be less than axisUpperExtent.");
+            }
+
+            int sign = isIncInverted ? -1 : 1;
+
+            // x = o + s * (x0 - p) * l
+            //         ----------------
+            //               q - p
+            // x0 = (x - o) * (q - p) + p
+            //      -----------------
+            //             s * l
+            // return screenZero + sign * (value - axisLowerExtent) * axisLength / (axisUpperExtent - axisLowerExtent);
+            return axisLowerExtent + sign * (value - screenZero) * (axisUpperExtent - axisLowerExtent) / axisLength;
+        }
+
+        public static double UntranslateX(
+                double value, double screenZero, double axisLength, double axisLowerExtent, double axisUpperExtent,
+                bool isIncInverted = false)
+        {
+            return Untranslate(value, screenZero, axisLength, axisLowerExtent, axisUpperExtent, isIncInverted);
+        }
+
+        public static double UntranslateY(
+                double value, double screenZero, double axisLength, double axisLowerExtent, double axisUpperExtent,
+                bool isIncInverted = true)
+        {
+            return Untranslate(value, screenZero, axisLength, axisLowerExtent, axisUpperExtent, isIncInverted);
+        }
+
         private static double GetAxisExtentQuarter(double x, bool isLowerExtent)
         {
             if (x == 0) return x;
