@@ -369,27 +369,25 @@ namespace Test
 
         public static bool ItInstantiates()
         {
-            Axis axis = new Axis(20, 100, -10, 10);
+            Axis axis = new Axis(20, 100, -5, 15);
             if (axis.Start != 20) return false;
-            if (Math.Round(axis.Origin, 3) != 70) return false;
+            if (Math.Round(axis.Origin, 3) != 45) return false;
             if (axis.Length != 100) return false;
-            if (axis.LowerExtent != -10) return false;
-            if (axis.UpperExtent != 10) return false;
+            if (axis.LowerExtent != -5) return false;
+            if (axis.UpperExtent != 15) return false;
             if (axis.Inverted) return false;
-            axis.Inverted = true;
-            if (!axis.Inverted) return false;
             if (axis.Step != 5) return false;
             if (Math.Round(axis.InverseStep, 3) != 0.2) return false;
 
-            Axis axis2 = new Axis(20, 100, new float[] { -10, 0, 10 });
+            Axis axis2 = new Axis(20, 100, new float[] { -15, 0, 5 });
             if (axis2.Start != 20) return false;
-            if (Math.Round(axis2.Origin, 3) != 70) return false;
+            if (Math.Round(axis2.Origin, 3) != 100) return false;
             if (axis2.Length != 100) return false;
-            if (axis2.LowerExtent != -10) return false;
-            if (axis2.UpperExtent != 10) return false;
+            if (axis2.LowerExtent != -20) return false;
+            if (axis2.UpperExtent != 5) return false;
             if (axis2.Inverted) return false;
-            if (axis2.Step != 5) return false;
-            if (Math.Round(axis2.InverseStep, 3) != 0.2) return false;
+            if (axis2.Step != 4) return false;
+            if (Math.Round(axis2.InverseStep, 3) != 0.25) return false;
 
             Axis axis3 = new Axis(20, 100, new float[] { 10, 10, 10 });
             if (axis3.Start != 20) return false;
@@ -421,15 +419,25 @@ namespace Test
             if (axis5.Step != 5) return false;
             if (Math.Round(axis5.InverseStep, 3) != 0.2) return false;
 
-            // Axis axis6 = new Axis(20, 100, 10, 30, true);
-            // if (axis6.Start != 20) return false;
-            // if (Math.Round(axis6.Origin, 3) != -30) return false;
-            // if (axis6.Length != 100) return false;
-            // if (axis6.LowerExtent != 10) return false;
-            // if (axis6.UpperExtent != 30) return false;
-            // if (axis6.Inverted) return false;
-            // if (axis6.Step != 5) return false;
-            // if (Math.Round(axis6.InverseStep, 3) != 0.2) return false;
+            Axis axis6 = new Axis(20, 100, 10, 30, true);
+            if (axis6.Start != 20) return false;
+            if (Math.Round(axis6.Origin, 3) != 170) return false;
+            if (axis6.Length != 100) return false;
+            if (axis6.LowerExtent != 10) return false;
+            if (axis6.UpperExtent != 30) return false;
+            if (!axis6.Inverted) return false;
+            if (axis6.Step != 5) return false;
+            if (Math.Round(axis6.InverseStep, 3) != 0.2) return false;
+
+            Axis axis7 = new Axis(20, 100, -15, 5, true);
+            if (axis7.Start != 20) return false;
+            if (Math.Round(axis7.Origin, 3) != 45) return false;
+            if (axis7.Length != 100) return false;
+            if (axis7.LowerExtent != -15) return false;
+            if (axis7.UpperExtent != 5) return false;
+            if (!axis7.Inverted) return false;
+            if (axis7.Step != 5) return false;
+            if (Math.Round(axis7.InverseStep, 3) != 0.2) return false;
 
             return true;
         }

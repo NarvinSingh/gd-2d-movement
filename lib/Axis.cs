@@ -7,7 +7,6 @@ namespace Graphing
         private float length;
         private float lowerExtent;
         private float upperExtent;
-        private int sign;
 
         public Axis(float start, float length, float lowerExtent, float upperExtent, bool isInverted = false)
         {
@@ -31,7 +30,8 @@ namespace Graphing
         public float Origin {
             get
             {
-                return Start - sign * LowerExtent * Step;
+                if (!Inverted) return Start - LowerExtent * Step;
+                return (Start + Length) + LowerExtent * Step;
             }
         }
 
@@ -81,17 +81,7 @@ namespace Graphing
 
         public Range SeriesRange { get; private set; }
        
-        public bool Inverted
-        {
-            get
-            {
-                return sign != 1 ? true : false;
-            }
-            set
-            {
-                sign = value ? -1 : 1;
-            }
-        }
+        public bool Inverted { get; set; }
 
         public float Step
         {
