@@ -419,6 +419,46 @@ namespace Test
             if (axis7.Step != 5) return false;
             if (Math.Round(axis7.InverseStep, 3) != 0.2) return false;
 
+            try
+            {
+                Axis axis8 = new Axis(20, 100, 0, -1, true);
+                return false;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                if (!e.Message.StartsWith("lowerExtent must be less than upperExtent.")) return false;
+            }
+
+            try
+            {
+                axis.Length = 0;
+                return false;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                if (!e.Message.StartsWith("Length must be greater than zero.")) return false;
+            }
+
+            try
+            {
+                axis.LowerExtent = axis.UpperExtent;
+                return false;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                if (!e.Message.StartsWith("LowerExtent must be less than UpperExtent.")) return false;
+            }
+
+            try
+            {
+                axis.UpperExtent = axis.LowerExtent;
+                return false;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                if (!e.Message.StartsWith("UpperExtent must be less than LowerExtent.")) return false;
+            }
+
             return true;
         }
 

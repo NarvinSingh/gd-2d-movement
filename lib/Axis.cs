@@ -43,7 +43,7 @@ namespace Graphing
             }
             set
             {
-                if (value <= 0) throw new ArgumentOutOfRangeException("Length must be greater than zero.");
+                if (value <= 0) throw new ArgumentOutOfRangeException("Length", "Length must be greater than zero.");
                 length = value;
             }
         }
@@ -57,7 +57,7 @@ namespace Graphing
             set {
                 if (value >= upperExtent)
                 {
-                    throw new ArgumentOutOfRangeException("LowerExtent must be less than UpperExtent.");
+                    throw new ArgumentOutOfRangeException("LowerExtent", "LowerExtent must be less than UpperExtent.");
                 }
                 lowerExtent = value;
             }
@@ -73,7 +73,7 @@ namespace Graphing
             {
                 if (value <= lowerExtent)
                 {
-                    throw new ArgumentOutOfRangeException("UpperExtent must be less than LowerExtent.");
+                    throw new ArgumentOutOfRangeException("UpperExtent", "UpperExtent must be less than LowerExtent.");
                 }
                 upperExtent = value;
             }
@@ -137,7 +137,8 @@ namespace Graphing
         {
             if (upperExtent <= lowerExtent)
             {
-                throw new ArgumentOutOfRangeException("upperExtent must be greatet than lowerExtent.");
+                throw new ArgumentOutOfRangeException("lowerExtent, upperExtent",
+                        "lowerExtent must be less than upperExtent.");
             }
             Start = start;
             Length = length;
