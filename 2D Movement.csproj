@@ -63,6 +63,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="levels\KinematicsTest.cs" />
+    <Compile Include="lib\Axis.cs" />
+    <Compile Include="lib\AxisTest.cs" />
     <Compile Include="lib\Plot.cs" />
     <Compile Include="nodes\Carousel.cs" />
     <Compile Include="nodes\Graph.cs" />
