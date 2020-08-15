@@ -411,24 +411,52 @@ namespace Test
             if (axis4.Step != 5) return false;
             if (Math.Round(axis4.InverseStep, 3) != 0.2) return false;
 
+            Axis axis5 = new Axis(20, 100, 10, 30);
+            if (axis5.Start != 20) return false;
+            if (Math.Round(axis5.Origin, 3) != -30) return false;
+            if (axis5.Length != 100) return false;
+            if (axis5.LowerExtent != 10) return false;
+            if (axis5.UpperExtent != 30) return false;
+            if (axis5.Inverted) return false;
+            if (axis5.Step != 5) return false;
+            if (Math.Round(axis5.InverseStep, 3) != 0.2) return false;
+
+            // Axis axis6 = new Axis(20, 100, 10, 30, true);
+            // if (axis6.Start != 20) return false;
+            // if (Math.Round(axis6.Origin, 3) != -30) return false;
+            // if (axis6.Length != 100) return false;
+            // if (axis6.LowerExtent != 10) return false;
+            // if (axis6.UpperExtent != 30) return false;
+            // if (axis6.Inverted) return false;
+            // if (axis6.Step != 5) return false;
+            // if (Math.Round(axis6.InverseStep, 3) != 0.2) return false;
+
             return true;
         }
 
         public static bool ItMaps()
         {
             Axis axis = new Axis(20, 100, -10, 10);
-
             if (Math.Round(axis.Map(5), 3) != 95) return false;
             if (Math.Round(axis.Map(-5), 3) != 45) return false;
+
+            Axis axis2 = new Axis(20, 100, -10, 10, true);
+            if (Math.Round(axis2.Map(5), 3) != 45) return false;
+            if (Math.Round(axis2.Map(-5), 3) != 95) return false;
+
             return true;
         }
 
         public static bool ItUnmaps()
         {
             Axis axis = new Axis(20, 100, -10, 10);
-
             if (Math.Round(axis.Unmap(95), 3) != 5) return false;
             if (Math.Round(axis.Unmap(45), 3) != -5) return false;
+
+            Axis axis2 = new Axis(20, 100, -10, 10, true);
+            if (Math.Round(axis2.Unmap(45), 3) != 5) return false;
+            if (Math.Round(axis2.Unmap(95), 3) != -5) return false;
+
             return true;
         }
     }

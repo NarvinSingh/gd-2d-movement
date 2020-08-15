@@ -4,37 +4,38 @@ namespace Graphing
 {
     public class Axis
     {
-        private int length;
+        private float length;
         private float lowerExtent;
         private float upperExtent;
         private int sign;
 
-        public Axis(int start, int length, float lowerExtent, float upperExtent, bool isInverted = false)
+        public Axis(float start, float length, float lowerExtent, float upperExtent, bool isInverted = false)
         {
             Init(start, length, lowerExtent, upperExtent, isInverted);
         }
 
-        public Axis(int start, int length, float[] values, bool isInverted = false)
+        public Axis(float start, float length, float[] series, bool isInverted = false)
         {
-            Range range = GetRange(values);
+            SeriesRange = GetRange(series);
 
-            if (range.Min != range.Max)
+            if (SeriesRange.Min != SeriesRange.Max)
             {
-                Init(start, length, CalcLowerExtent(range.Min), CalcUpperExtent(range.Max), isInverted);
+                Init(start, length, CalcLowerExtent(SeriesRange.Min), CalcUpperExtent(SeriesRange.Max), isInverted);
             }
-            else if (range.Min >= 0) Init(start, length, 0, range.Max * 2, isInverted);
-            else Init(start, length, range.Min * 2, 0, isInverted);
+            else if (SeriesRange.Min >= 0) Init(start, length, 0, SeriesRange.Max * 2, isInverted);
+            else Init(start, length, SeriesRange.Min * 2, 0, isInverted);
         }
 
-        public int Start { get; set; }
+        public float Start { get; set; }
+        
         public float Origin {
             get
             {
-                return Start - LowerExtent * Step;
+                return Start - sign * LowerExtent * Step;
             }
         }
 
-        public int Length
+        public float Length
         {
             get
             {
@@ -78,6 +79,8 @@ namespace Graphing
             }
         }
 
+        public Range SeriesRange { get; private set; }
+       
         public bool Inverted
         {
             get
@@ -123,12 +126,14 @@ namespace Graphing
 
         public float Map(float value)
         {
-            return Start + sign * (value - LowerExtent) * Step;
+            if (!Inverted) return Start + (value - LowerExtent) * Step;
+            return Start + Length - (value - LowerExtent) * Step;
         }
 
         public float Unmap(float coord)
         {
-            return LowerExtent + sign * (coord - Start) * InverseStep;
+            if (!Inverted) return LowerExtent + (coord - Start) * InverseStep;
+            return LowerExtent + (Start + Length - coord) * InverseStep;
         }
 
         public static float CalcLowerExtent(float minValue, int steps = 1)
@@ -141,19 +146,6 @@ namespace Graphing
             return CalcExtent(maxValue, false, steps);
         }
 
-        private static float CalcExtent(float value, bool isMin)
-        {
-            if (value == 0) return value;
-
-            double magnitude = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(value))));
-            double factor = Math.Truncate(value / magnitude);
-            double remainder = Math.Round((value - factor * magnitude) / magnitude, 3);
-
-            if (remainder == 0) return value;
-            if (value >= 0) return (float)((factor + Convert.ToInt32(isMin)) * magnitude);
-            return (float)((factor - Convert.ToInt32(isMin)) * magnitude);
-        }
-
         private static float CalcExtent(float value, bool isMin, int steps = 1)
         {
             if (value == 0) return value; // log(0) is undefined so return the correct answer here
@@ -162,15 +154,11 @@ namespace Graphing
             double factor = Math.Truncate(value / magnitude);
             double remainder = Math.Round((value - factor * magnitude) / magnitude, 3);
 
-            if (isMin)
-            {
-                float result = (float)((factor + Math.Floor(remainder * steps) / steps) * magnitude);
-                return result;
-            }
+            if (isMin) return (float)((factor + Math.Floor(remainder * steps) / steps) * magnitude);
             return (float)((factor + Math.Ceiling(remainder * steps) / steps) * magnitude);
         }
 
-        private void Init(int start, int length, float lowerExtent, float upperExtent, bool isInverted = false)
+        private void Init(float start, float length, float lowerExtent, float upperExtent, bool isInverted = false)
         {
             if (upperExtent <= lowerExtent)
             {
