@@ -66,6 +66,8 @@
     <Compile Include="lib\Axis.cs" />
     <Compile Include="lib\AxisTest.cs" />
     <Compile Include="lib\Plot.cs" />
+    <Compile Include="lib\Range.cs" />
+    <Compile Include="lib\RangeTest.cs" />
     <Compile Include="nodes\Carousel.cs" />
     <Compile Include="nodes\Graph.cs" />
     <Compile Include="lib\Kinematics.cs" />

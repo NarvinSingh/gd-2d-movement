@@ -15,7 +15,7 @@ namespace Graphing
 
         public Axis(float start, float length, float[] series, bool isInverted = false)
         {
-            SeriesRange = GetRange(series);
+            SeriesRange = new Range(series);
 
             if (SeriesRange.Min != SeriesRange.Max)
             {
@@ -99,21 +99,6 @@ namespace Graphing
             }
         }
 
-        public static Range GetRange(float[] values)
-        {
-            if (values.Length == 0) throw new ArgumentException("values can't be empty.");
-
-            Range range = new Range(values[0], values[0]);
-
-            foreach (float value in values)
-            {
-                if (value < range.Min) range.Min = value;
-                else if (value > range.Max) range.Max = value;
-            }
-
-            return range;
-        }
-
         public float Map(float value)
         {
             if (!Inverted) return Start + (value - LowerExtent) * Step;
@@ -162,25 +147,6 @@ namespace Graphing
             UpperExtent = upperExtent;
 
             Inverted = isInverted;
-        }
-
-        public struct Range
-        {
-            public Range(float min, float max)
-            {
-                Min = min;
-                Max = max;
-            }
-
-            public float Min { get; set; }
-            public float Max { get; set; }
-            public float Size
-            {
-                get
-                {
-                    return Math.Abs(Max - Min);
-                }
-            }
         }
     }
 }

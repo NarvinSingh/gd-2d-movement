@@ -6,26 +6,6 @@ namespace Test
 {
     public static class AxisTest
     {
-        public static bool ItGetsRange()
-        {
-            Range range = Axis.GetRange(new float[] { 1, 2, 3, 4, 5 });
-            if (range.Min != 1) return false;
-            if (range.Max != 5) return false;
-            if (range.Size != 4) return false;
-
-            Range range2 = Axis.GetRange(new float[] { -1, -2, -3, -4, -5 });
-            if (range2.Min != -5) return false;
-            if (range2.Max != -1) return false;
-            if (range2.Size != 4) return false;
-
-            Range range3 = Axis.GetRange(new float[] { 5, -1, -3, 4, 2 });
-            if (range3.Min != -3) return false;
-            if (range3.Max != 5) return false;
-            if (range3.Size != 8) return false;
-
-            return true;
-        }
-
         public static bool ItCalcsExtents()
         {
             if (Math.Round(CalcLowerExtent(0F), 3) != 0) return false;
