@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Graphing
+namespace Com.NarvinSingh.Graphing
 {
     public class Range
     {

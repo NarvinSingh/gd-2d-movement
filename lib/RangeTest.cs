@@ -1,7 +1,7 @@
-﻿using Graphing;
-using System;
+﻿using System;
+using Com.NarvinSingh.Graphing;
 
-namespace Test
+namespace Com.NarvinSingh.Test
 {
     public static class RangeTest
     {

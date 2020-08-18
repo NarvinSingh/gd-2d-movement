@@ -1,6 +1,7 @@
 ﻿using System;
+using static System.Math;
 
-namespace Graphing
+namespace Com.NarvinSingh.Graphing
 {
     public class Axis
     {
@@ -125,12 +126,12 @@ namespace Graphing
         {
             if (value == 0) return value; // log(0) is undefined so return the correct answer here
 
-            double magnitude = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(value))));
-            double factor = Math.Truncate(value / magnitude);
-            double remainder = Math.Round((value - factor * magnitude) / magnitude, 3);
+            double magnitude = Pow(10, Floor(Log10(Abs(value))));
+            double factor = Truncate(value / magnitude);
+            double remainder = Round((value - factor * magnitude) / magnitude, 3);
 
-            if (isMin) return (float)((factor + Math.Floor(remainder * steps) / steps) * magnitude);
-            return (float)((factor + Math.Ceiling(remainder * steps) / steps) * magnitude);
+            if (isMin) return (float)((factor + Floor(remainder * steps) / steps) * magnitude);
+            return (float)((factor + Ceiling(remainder * steps) / steps) * magnitude);
         }
 
         private void Init(float start, float length, float lowerExtent, float upperExtent, bool isInverted = false)

@@ -63,8 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="levels\KinematicsTest.cs" />
+    <Compile Include="lib\ApproximateTest.cs" />
     <Compile Include="lib\Axis.cs" />
     <Compile Include="lib\AxisTest.cs" />
+    <Compile Include="lib\Approximate.cs" />
+    <Compile Include="lib\KinematicsTest.cs" />
     <Compile Include="lib\Plot.cs" />
     <Compile Include="lib\Range.cs" />
     <Compile Include="lib\RangeTest.cs" />
