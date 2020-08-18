@@ -1,22 +1,90 @@
 using Godot;
 using System;
-using Physics;
-using Graphing;
-using Test;
+using Com.NarvinSingh.Physics;
+using Com.NarvinSingh.Graphing;
+using Com.NarvinSingh.Test;
 
 public class KinematicsTest : Carousel
 {
     private readonly PackedScene graphScene;
 
+    private Approximate.Fxy VelocityFn(double a, double d)
+    {
+        return (double dt, double v0) =>
+        {
+            int phase = (v0 >= 0 && d >= 0) || (v0 < 0 && d < 0) ? 1 : -1;
+            return v0 + a * dt - phase * d * v0 * v0 * dt;
+        };
+    }
+
     public override void _Ready()
     {
+        // long t;
+        // int i;
+        // double d;
+        // float f;
+        // Stopwatch w = new Stopwatch();
+
+        // w.Start();
+        // for (i = 0; i < 1000000; i++) d = Math.Tan(1.5);
+        // w.Stop();
+        // t = w.ElapsedTicks;
+        // GD.Print(String.Format("Math.Tan {0}", t));
+
+        // w.Start();
+        // for (i = 0; i < 1000000; i++) f = (float)Math.Tan(1.5);
+        // w.Stop();
+        // t = w.ElapsedTicks;
+        // GD.Print(String.Format("Math.Tan {0}", t));
+
+        // w.Start();
+        // for (i = 0; i < 1000000; i++) f = Mathf.Tan(1.5F);
+        // w.Stop();
+        // t = w.ElapsedTicks;
+        // GD.Print(String.Format("Mathf.Tan {0}", t));
+
+        GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
+        GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
+        GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
+
+        //double v0, a, d, t;
+
+        // v0 = 0; a = 100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+        // v0 = 0; a = -100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+        // v0 = 50; a = 100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+        // v0 = -50; a = -100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+        // v0 = 200; a = -100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+        // v0 = -200; a = 100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+        // v0 = 100; a = -100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+        // v0 = -100; a = 100; d = 0.01; t = 1;
+        // GD.Print(Approximate.Iterate(VelocityFn(a, d), 0, t, 1.0 / 1000000, v0));
+
+        //v0 = 100; a = -100; d = 0; t = 5;
+        //GD.Print(Approximate.IterateUntil(VelocityFn(a, d), 0, t, v0));
+        //v0 = 100; a = -200; d = 0; t = 5;
+        //GD.Print(Approximate.IterateUntil(VelocityFn(a, d), 0, t, v0));
+        //v0 = 100; a = -10; d = 0; t = 5;
+        //GD.Print(Approximate.IterateUntil(VelocityFn(a, d), 0, t, v0));
+        //v0 = 100; a = -100; d = 0.01; t = 5;
+        //GD.Print(Approximate.IterateUntil(VelocityFn(a, d), 0, t, v0));
+
+        GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
+        GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
+
+        GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
+        GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
+
         GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
         GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
         GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
         GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
-
-        GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
-        GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
 
         // graphScene = (PackedScene)ResourceLoader.Load("res://nodes/Graph.tscn");
         // carouselNodes.Add(CreateGraph(GenerateVelocityData(0, 100, 0.01), "1) v0 = 0, a = 100, d = 0.01"));
