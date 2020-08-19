@@ -43,9 +43,9 @@ public class KinematicsTest : Carousel
         // t = w.ElapsedTicks;
         // GD.Print(String.Format("Mathf.Tan {0}", t));
 
-        GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
-        GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
-        GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
+        // GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
+        // GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
+        // GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
 
         //double v0, a, d, t;
 
@@ -78,13 +78,13 @@ public class KinematicsTest : Carousel
         GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
         GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
 
-        GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
-        GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
+        // GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
+        // GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
 
-        GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
-        GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
-        GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
-        GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
+        // GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
+        // GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
+        // GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
+        // GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
 
         // graphScene = (PackedScene)ResourceLoader.Load("res://nodes/Graph.tscn");
         // carouselNodes.Add(CreateGraph(GenerateVelocityData(0, 100, 0.01), "1) v0 = 0, a = 100, d = 0.01"));
@@ -100,6 +100,8 @@ public class KinematicsTest : Carousel
         // carouselNodes.Add(CreateGraph(GenerateVelocityData(-15, 10), "11) v0 = -15, a = 10"));
         // carouselNodes.Add(CreateGraph(GenerateVelocityData(-15, -10), "12) v0 = -15, a = -10"));
         // SetActiveNode(0);
+        GD.Print("Goodbye");
+        GetTree().Quit();
     }
 
     private string Summarize(string description, bool isPass)
