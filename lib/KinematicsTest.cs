@@ -16,7 +16,8 @@ namespace Test
             if (TimeToStop(100, 100, 0) != -1) return false;
             if (TimeToStop(-100, -100, 0) != -1) return false;
 
-            if (TimeToStop(100, 100, 0.01) != double.PositiveInfinity) return false;
+            if (!double.IsNaN(TimeToStop(100, 100, 0.01))) return false;
+            if (!IsEqual(TimeToStop(50, 100, 0.01), -SumAccelerationTo(50, 1000, 0, 100, 0.01))) return false;
             if (!IsEqual(TimeToStop(100, -100, 0.01), SumAccelerationTo(0, 1000, 100, -100, 0.01))) return false;
 
             try
@@ -57,15 +58,6 @@ namespace Test
             if (!IsEqual(Velocity(1, -200, 100, 0.01), SumAcceleration(1, -200, 100, 0.01))) return false;
             if (!IsEqual(Velocity(1, 100, -100, 0.01), SumAcceleration(1, 100, -100, 0.01))) return false;
             if (!IsEqual(Velocity(1, -100, 100, 0.01), SumAcceleration(1, -100, 100, 0.01))) return false;
-
-            // if (Math.Round(Velocity(1, 0, 100, 0.01), 4) != 76.1594) return false;
-            // if (Math.Round(Velocity(1, 0, -100, 0.01), 4) != -76.1594) return false;
-            // if (Math.Round(Velocity(1, 50, 100, 0.01), 4) != 91.3671) return false;
-            // if (Math.Round(Velocity(1, -50, -100, 0.01), 4) != -91.3671) return false;
-            // if (Math.Round(Velocity(1, 200, -100, 0.01), 4) != 10.7561) return false;
-            // if (Math.Round(Velocity(1, -200, 100, 0.01), 4) != -10.7561) return false;
-            // if (Math.Round(Velocity(1, 100, -100, 0.01), 4) != -21.1367) return false;
-            // if (Math.Round(Velocity(1, -100, 100, 0.01), 4) != 21.1367) return false;
 
             try
             {

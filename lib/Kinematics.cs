@@ -15,11 +15,12 @@ namespace Com.NarvinSingh.Physics
 
 			if (a != 0 && d != 0)
 			{
-	
-				if (phase == 1) return double.PositiveInfinity;
-
 				double absV0 = Math.Abs(v0);
 				double absA = Math.Abs(a);
+	
+				// Returns NaN if you are at or above terminal velocity
+				if (phase == 1) return -(Complex.Atan(Complex.Sqrt(d/-absA) * absV0) / Complex.Sqrt(-absA * d)).Real;
+
 				return Math.Atan(Math.Sqrt(d / absA) * absV0) / Math.Sqrt(absA * d);
 			}
 
@@ -30,7 +31,7 @@ namespace Com.NarvinSingh.Physics
 		{
 			if (d < 0) throw new ArgumentOutOfRangeException("d", "d must be greater than or equal to zero.");
 			if (d == 0) return v0 + a * t;
-			if (a == 0) return v0 >= 0 ? v0 / (d * v0 * t + 1) : v0 / (d * (-v0) * t + 1);
+			if (a == 0) return v0 >= 0 ? v0 / (d * v0 * t + 1) : v0 / (d * -v0 * t + 1);
 
 			int phase = (v0 >= 0 && a > 0) || (v0 <= 0 && a < 0) ? 1 : -1;
 			double absV0 = Math.Abs(v0);
