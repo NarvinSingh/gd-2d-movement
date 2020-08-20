@@ -76,6 +76,16 @@ namespace Com.NarvinSingh.Test
                 if (!e.Message.StartsWith("x0 must be less than x.")) return false;
             }
 
+            try
+            {
+                ReimannSum((double xi, double sum) => 1, uint.MaxValue);
+                return false;
+            }
+            catch (OverflowException)
+            {
+                // NOP
+            }
+
             return true;
         }
 
@@ -135,21 +145,17 @@ namespace Com.NarvinSingh.Test
                 if (!e.Message.StartsWith("x0 must be less than x.")) return false;
             }
 
+            try
+            {
+                ReimannSumTo((double xi, double sum) => 1, 2, uint.MaxValue);
+                return false;
+            }
+            catch (OverflowException)
+            {
+                // NOP
+            }
+
             return true;
         }
-
-        // public static bool ItIterates()
-        // {
-        //     if (!IsEqual(Iterate((double dx, double y) => Math.Pow(Math.Sqrt(y) + dx, 2), 5), 25)) return false;
-        //     // dv = a dt - cv^2 dt
-        //     // dt = dv / (a - cv^2)
-        //     // dy = dx / y
-        //     // y dy = dx
-        //     // y^2 / 2 = x
-        //     double result = Iterate((double dx, double y) => dx - 2 * y, 6, 0, 0, 0.5);
-        //     if (!IsEqual(Iterate((double dx, double y) => dx - 2 * y, 6), 2)) return false;
-
-        //     return true;
-        // }
     }
 }

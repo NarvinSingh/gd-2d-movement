@@ -20,10 +20,10 @@ namespace Com.NarvinSingh.Test
             if (x0 > x) throw new ArgumentOutOfRangeException("x0, x", "x0 must be less than x.");
 
             double intervalSize = Abs(x - x0);
-            int n = (int)(intervalSize / dx);
+            uint n = checked((uint)(intervalSize / dx));
             double sum = y0;
 
-            for (int i = 0; i < n; i++) sum += f(x0 + i * dx, sum) * dx;
+            for (uint i = 0; i < n; i++) sum += f(x0 + i * dx, sum) * dx;
 
             double summedIntervalSize = n * dx;
 
@@ -45,11 +45,11 @@ namespace Com.NarvinSingh.Test
             if (y == y0) return x0;
 
             double intervalSize = Abs(x - x0);
-            int n = (int)(intervalSize / dx);
+            uint n = checked((uint)(intervalSize / dx));
             double sum = y0;
             IsSumReached isSumReached = y > y0 ? (IsSumReached)(() => sum >= y) : () => sum <= y;
 
-            for (int i = 0; i < n; i++)
+            for (uint i = 0; i < n; i++)
             {
                 sum += f(x0 + i * dx, sum) * dx;
                 if (isSumReached()) return x0 + (i + 1) * dx;
