@@ -16,7 +16,7 @@ namespace Test
             if (TimeToStop(100, 100, 0) != -1) return false;
             if (TimeToStop(-100, -100, 0) != -1) return false;
 
-            if (!double.IsNaN(TimeToStop(100, 100, 0.01))) return false;
+            if (TimeToStop(100, 100, 0.01) != double.NegativeInfinity) return false;
             if (!IsEqual(TimeToStop(50, 100, 0.01), -SumAccelerationTo(50, 1000, 0, 100, 0.01))) return false;
             if (!IsEqual(TimeToStop(100, -100, 0.01), SumAccelerationTo(0, 1000, 100, -100, 0.01))) return false;
 
