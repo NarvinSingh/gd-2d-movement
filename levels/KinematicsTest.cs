@@ -77,6 +77,8 @@ public class KinematicsTest : Carousel
 
         GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
         GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
+        GD.Print(Summarize(
+                "KinematicsTest.ItCalculatesTerminalVelocity", Test.KinematicsTest.ItCalculatesTerminalVelocity()));
 
         // GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
         // GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));

@@ -63,5 +63,13 @@ namespace Com.NarvinSingh.Physics
 			Complex c3 = Complex.Sqrt(-absA * d);
 			return (sign * c1 * Complex.Tan(Complex.Atan(c2 * absV2) + c3 * t2)).Real;
 		}
+
+		public static double TerminalVelocity(double a, double d)
+		{
+			if (a <= 0) throw new ArgumentOutOfRangeException("a", "a must be greater than zero.");
+			if (d <= 0) throw new ArgumentOutOfRangeException("d", "d must be greater than zero.");
+
+			return Math.Sqrt(a / d);
+		}
 	}
 }

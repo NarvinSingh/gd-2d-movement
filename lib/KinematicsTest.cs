@@ -72,6 +72,33 @@ namespace Test
             return true;
         }
 
+        public static bool ItCalculatesTerminalVelocity()
+        {
+            if (!IsEqual(TerminalVelocity(100, 0.1), SumAcceleration(10, 0, 100, 0.1))) return false;
+
+            try
+            {
+                TerminalVelocity(0, 0);
+                return false;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                if (!e.Message.StartsWith("a must be greater than zero.")) return false;
+            }
+
+            try
+            {
+                TerminalVelocity(1, 0);
+                return false;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                if (!e.Message.StartsWith("d must be greater than zero.")) return false;
+            }
+
+            return true;
+        }
+
         private static Fxy NetAcceleration(double a, double d)
         {
             return (double ti, double v) =>
