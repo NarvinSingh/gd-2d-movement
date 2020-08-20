@@ -1,7 +1,7 @@
-﻿using System;
-using Com.NarvinSingh.Graphing;
-using static System.Math;
+﻿using Com.NarvinSingh.Graphing;
+using System;
 using static Com.NarvinSingh.Graphing.Axis;
+using static System.Math;
 
 namespace Com.NarvinSingh.Test
 {

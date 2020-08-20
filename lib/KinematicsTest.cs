@@ -1,6 +1,6 @@
 ﻿using System;
-using static Com.NarvinSingh.Test.Approximate;
 using static Com.NarvinSingh.Physics.Kinematics;
+using static Com.NarvinSingh.Test.Approximate;
 
 namespace Test
 {
@@ -38,7 +38,7 @@ namespace Test
             if (Velocity(1, 0, 0, 0) != 0) return false;
             if (Velocity(1, 100, 0, 0) != 100) return false;
             if (Velocity(1, -100, 0, 0) != -100) return false;
-            
+
             if (Velocity(1, 0, 100, 0) != 100) return false;
             if (Velocity(1, 0, -100, 0) != -100) return false;
             if (Velocity(1, 100, 100, 0) != 200) return false;
@@ -68,7 +68,7 @@ namespace Test
             {
                 if (!e.Message.StartsWith("d must be greater than or equal to zero.")) return false;
             }
-            
+
             return true;
         }
 

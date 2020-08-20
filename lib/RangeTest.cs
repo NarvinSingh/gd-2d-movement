@@ -1,5 +1,5 @@
-﻿using System;
-using Com.NarvinSingh.Graphing;
+﻿using Com.NarvinSingh.Graphing;
+using System;
 
 namespace Com.NarvinSingh.Test
 {
@@ -59,7 +59,7 @@ namespace Com.NarvinSingh.Test
 
             try
             {
-                Range range10 = new Range(new float[] {});
+                Range range10 = new Range(new float[] { });
                 return false;
             }
             catch (ArgumentException e)

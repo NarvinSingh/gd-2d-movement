@@ -2,9 +2,9 @@ using Godot;
 
 public class PolygonOutline2D : Polygon2D
 {
-	[Export] public Color StrokeColor { get; set; } = new Color(0, 0, 0);
-	[Export] public float StrokeWidth { get; set; } = 1.0F;
-	[Export] public bool Closed { get; set; } = true;
+    [Export] public Color StrokeColor { get; set; } = new Color(0, 0, 0);
+    [Export] public float StrokeWidth { get; set; } = 1.0F;
+    [Export] public bool Closed { get; set; } = true;
 
     public override void _Draw()
     {

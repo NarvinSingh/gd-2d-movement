@@ -27,8 +27,9 @@ namespace Com.NarvinSingh.Graphing
         }
 
         public float Start { get; set; }
-        
-        public float Origin {
+
+        public float Origin
+        {
             get
             {
                 if (!Inverted) return Start - LowerExtent * Step;
@@ -55,7 +56,8 @@ namespace Com.NarvinSingh.Graphing
             {
                 return lowerExtent;
             }
-            set {
+            set
+            {
                 if (value >= upperExtent)
                 {
                     throw new ArgumentOutOfRangeException("LowerExtent", "LowerExtent must be less than UpperExtent.");
@@ -81,7 +83,7 @@ namespace Com.NarvinSingh.Graphing
         }
 
         public Range SeriesRange { get; private set; }
-       
+
         public bool Inverted { get; set; }
 
         public float Step

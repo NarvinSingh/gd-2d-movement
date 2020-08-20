@@ -1,8 +1,7 @@
+using Com.NarvinSingh.Physics;
+using Com.NarvinSingh.Test;
 using Godot;
 using System;
-using Com.NarvinSingh.Physics;
-using Com.NarvinSingh.Graphing;
-using Com.NarvinSingh.Test;
 
 public class KinematicsTest : Carousel
 {
@@ -42,8 +41,8 @@ public class KinematicsTest : Carousel
         carouselNodes.Add(CreateGraph(GenerateVelocityData(-15, -10), "12) v0 = -15, a = -10"));
         SetActiveNode(0);
 
-        GD.Print("Goodbye");
-        GetTree().Quit();
+        //GD.Print("Goodbye");
+        //GetTree().Quit();
     }
 
     private string Summarize(string description, bool isPass)

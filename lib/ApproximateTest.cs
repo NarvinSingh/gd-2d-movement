@@ -1,6 +1,6 @@
 ﻿using System;
-using static System.Math;
 using static Com.NarvinSingh.Test.Approximate;
+using static System.Math;
 
 namespace Com.NarvinSingh.Test
 {

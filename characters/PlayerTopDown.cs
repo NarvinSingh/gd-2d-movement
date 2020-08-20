@@ -99,13 +99,13 @@ public class PlayerTopDown : KinematicBody2D
         if (iPara != Vector2.Zero && iPara.AngleTo(v0) == 0) v = CalcSpeed(s0, dt, d, a * iPara.Length()) * vHat;
         else
         {
-			float tStop = CalcStopTime(s0, d, f);
+            float tStop = CalcStopTime(s0, d, f);
 
-			if (tStop > dt) v = CalcSpeed(s0, dt, d, f) * vHat;
-			else v = -CalcSpeed(0, dt - tStop, d, a * iPara.Length()) * vHat;
+            if (tStop > dt) v = CalcSpeed(s0, dt, d, f) * vHat;
+            else v = -CalcSpeed(0, dt - tStop, d, a * iPara.Length()) * vHat;
         }
 
-		v += CalcSpeed(0, dt, d, a * iOrth.Length()) * iOrth.Normalized();
+        v += CalcSpeed(0, dt, d, a * iOrth.Length()) * iOrth.Normalized();
 
         return v;
     }
@@ -171,30 +171,30 @@ public class PlayerTopDown : KinematicBody2D
         return CalcVelocity(dt, v0, GetInputVector(), Speed, Acceleration, frictionCoeff, dragCoeff);
     }
 
-	private float CalcSpeed(float s0, float dt, float d = 0, float a = 0)
-	{
-		if (d == 0) return s0 + a * dt;
+    private float CalcSpeed(float s0, float dt, float d = 0, float a = 0)
+    {
+        if (d == 0) return s0 + a * dt;
 
-		if (a > 0)
-		{
-			Complex c1 = new Complex(0, Math.Sqrt(a / d));
-			Complex c2 = new Complex(0, Math.Sqrt(d / a));
-			Complex c3 = new Complex(0, Math.Sqrt(a * d));
-			Complex s = -c1 * Complex.Tan(Complex.Atan(c2 * s0) + c3 * dt);
-			return (float)s.Real;
-		}
-		
-		if (a < 0) return Mathf.Sqrt(a / d) * Mathf.Tan(Mathf.Atan(Mathf.Sqrt(d / a) * s0) + Mathf.Sqrt(a * d) * dt);
-		
-		return s0 / (d * s0 * dt + 1);
-	}
+        if (a > 0)
+        {
+            Complex c1 = new Complex(0, Math.Sqrt(a / d));
+            Complex c2 = new Complex(0, Math.Sqrt(d / a));
+            Complex c3 = new Complex(0, Math.Sqrt(a * d));
+            Complex s = -c1 * Complex.Tan(Complex.Atan(c2 * s0) + c3 * dt);
+            return (float)s.Real;
+        }
 
-	private float CalcStopTime(float s0, float d = 0, float f = 0)
-	{
-		if (f <= 0) return float.PositiveInfinity;
+        if (a < 0) return Mathf.Sqrt(a / d) * Mathf.Tan(Mathf.Atan(Mathf.Sqrt(d / a) * s0) + Mathf.Sqrt(a * d) * dt);
 
-		if (d == 0) return s0 / f;
+        return s0 / (d * s0 * dt + 1);
+    }
 
-		return Mathf.Atan(Mathf.Sqrt(f / d) * s0) / Mathf.Sqrt(f * d);
-	}
+    private float CalcStopTime(float s0, float d = 0, float f = 0)
+    {
+        if (f <= 0) return float.PositiveInfinity;
+
+        if (d == 0) return s0 / f;
+
+        return Mathf.Atan(Mathf.Sqrt(f / d) * s0) / Mathf.Sqrt(f * d);
+    }
 }
