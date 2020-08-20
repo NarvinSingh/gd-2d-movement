@@ -15,7 +15,9 @@ namespace Com.NarvinSingh.Graphing
         public Range(float[] values)
         {
             if (values.Length == 0) throw new ArgumentException("values can't be empty.", "values");
+
             Init(values[0], values[0]);
+
             for (int i = values.Length - 1; i > 0; i--) Include(values[i]);
         }
 
