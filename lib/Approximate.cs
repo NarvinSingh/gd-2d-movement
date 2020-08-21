@@ -14,6 +14,7 @@ namespace Com.NarvinSingh.Test
             return delta >= 0 ? delta < tolerance : -delta < tolerance;
         }
 
+        // Perform a left Reimann sum
         public static double ReimannSum(Fxy f, double x, double x0 = 0, double y0 = 0, double dx = 1e-6)
         {
             if (dx <= 0) throw new ArgumentOutOfRangeException("dx", "dx must be greater than zero.");
@@ -25,6 +26,7 @@ namespace Com.NarvinSingh.Test
 
             for (uint i = 0; i < n; i++) sum += f(x0 + i * dx, sum) * dx;
 
+            // Sum the last term that will be left over if the interval isn't divisible by the increment
             double summedIntervalSize = n * dx;
 
             if (summedIntervalSize < intervalSize)
@@ -36,6 +38,7 @@ namespace Com.NarvinSingh.Test
             return sum;
         }
 
+        // Perform the left ReimannSum until the target value is reached
         public static double ReimannSumTo(
                 Fxy f, double y, double x = 1000, double x0 = 0, double y0 = 0, double dx = 1e-6)
         {
@@ -47,6 +50,7 @@ namespace Com.NarvinSingh.Test
             double intervalSize = Abs(x - x0);
             uint n = checked((uint)(intervalSize / dx));
             double sum = y0;
+            // We can be approaching the target value from above or below depending on the initial value
             IsSumReached isSumReached = y > y0 ? (IsSumReached)(() => sum >= y) : () => sum <= y;
 
             for (uint i = 0; i < n; i++)
@@ -55,6 +59,7 @@ namespace Com.NarvinSingh.Test
                 if (isSumReached()) return x0 + (i + 1) * dx;
             }
 
+            // Sum the last term that will be left over if the interval isn't divisible by the increment
             double summedIntervalSize = n * dx;
 
             if (summedIntervalSize < intervalSize)
