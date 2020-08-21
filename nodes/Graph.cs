@@ -1,20 +1,19 @@
+using Com.NarvinSingh.Graphing;
 using Godot;
 using System;
 using System.Collections.Generic;
-using Graphing;
 
 public class Graph : Area2D
 {
+    private const string DEFAULT_POINT_HIGHLIGHT_COLOR = "6680FF";
     private const float POINT_RADIUS = 4;
+    private const float POINT_SCALE = 1.5F;
     private const float CHI_OFFSET = 6;
-    private readonly Vector2 POINT_SCALE = new Vector2(1.5F, 1.5F);
 
     private bool isReady = false;
     private string title;
     private string xAxisLabel;
     private string yAxisLabel;
-    private float[] xSeries;
-    private float[] ySeries;
     private Label titleLabel;
     private Node2D xAxis;
     private Line2D xLine;
@@ -22,13 +21,12 @@ public class Graph : Area2D
     private Label xMinLabel;
     private Label xMaxLabel;
     private float xAxisLen;
+    private Node2D yAxis;
     private Line2D yLine;
     private Label yLabel;
     private Label yMinLabel;
     private Label yMaxLabel;
     private float yAxisLen;
-    private float yLowerExtent;
-    private float yUpperExtent;
     private Vector2 origin;
     private Node2D crosshair;
     private Line2D xCrosshair;
@@ -44,6 +42,7 @@ public class Graph : Area2D
     private float pointRadius;
     private List<Sprite> points;
     private Sprite activePoint = null;
+    private Vector2 pointScale = new Vector2(POINT_SCALE, POINT_SCALE);
 
     [Export]
     public string Title
@@ -87,34 +86,11 @@ public class Graph : Area2D
         }
     }
 
-    [Export]
-    public float[] XSeries
-    {
-        get
-        {
-            return xSeries;
-        }
-        set
-        {
-            xSeries = value;
-            Draw();
-        }
-    }
-    [Export]
-    public float[] YSeries
-    {
-        get
-        {
-            return ySeries;
-        }
-        set
-        {
-            ySeries = value;
-            Draw();
-        }
-    }
+    [Export] public float[] XSeries { get; set; }
 
-    [Export] public Color HighlightColor { get; set; } = new Color("6680FF");
+    [Export] public float[] YSeries { get; set; }
+
+    [Export] public Color HighlightColor { get; set; } = new Color(DEFAULT_POINT_HIGHLIGHT_COLOR);
 
     public override void _Ready()
     {
@@ -127,6 +103,7 @@ public class Graph : Area2D
         xLabel = (Label)GetNode("XAxis/Label");
         xMinLabel = (Label)GetNode("XAxis/Min");
         xMaxLabel = (Label)GetNode("XAxis/Max");
+        yAxis = (Node2D)GetNode("YAxis");
         yLine = (Line2D)GetNode("YAxis/Axis");
         yLabel = (Label)GetNode("YAxis/Label");
         yMinLabel = (Label)GetNode("YAxis/Min");
@@ -155,7 +132,6 @@ public class Graph : Area2D
         titleLabel.Text = title;
         xLabel.Text = xAxisLabel;
         yLabel.Text = yAxisLabel;
-        xMinLabel.Visible = false;
 
         Draw();
     }
@@ -168,18 +144,24 @@ public class Graph : Area2D
         return newPoint;
     }
 
-    private void SetActivePoint(Sprite point = null)
+    private void SetActivePoint(int i)
     {
+        Sprite point = i >= 0 && i < points.Count ? points[i] : null;
+
+        if (activePoint == point) return;
+
         if (!(activePoint is null))
         {
             activePoint.Scale = Vector2.One;
             activePoint.Modulate = pointColor;
             activePoint.ZIndex = 0;
         }
+
         activePoint = point;
+
         if (!(activePoint is null))
         {
-            activePoint.Scale = POINT_SCALE;
+            activePoint.Scale = pointScale;
             activePoint.Modulate = HighlightColor;
             activePoint.ZIndex = 1;
         }
@@ -199,45 +181,36 @@ public class Graph : Area2D
         Erase();
 
         int frames = XSeries.Length;
+        Axis x = new Axis(origin.x, xAxisLen, XSeries);
+        Axis y = new Axis(origin.y - yAxisLen, yAxisLen, YSeries, true);
 
-        Plot.MinMax xMinMax = new Plot.MinMax(XSeries[0], XSeries[XSeries.Length - 1]);
-        Plot.MinMax yMinMax = Plot.GetMinMax(YSeries);
+        xMinLabel.Text = String.Format("{0:F2}", x.LowerExtent);
+        xMaxLabel.Text = String.Format("{0:F2}", x.UpperExtent);
+        yMinLabel.Text = String.Format("{0:F2}", y.LowerExtent);
+        yMaxLabel.Text = String.Format("{0:F2}", y.UpperExtent);
 
-        if (yMinMax.Min != yMinMax.Max)
+        // Translate the x-axis to 0 on the y-axis
+        if (y.LowerExtent != 0)
         {
-            yLowerExtent = Math.Min((float)Plot.GetAxisLowerExtent(yMinMax.Min), 0);
-            yUpperExtent = Math.Max((float)Plot.GetAxisUpperExtent(yMinMax.Max), 0);
-        }
-        else
-        {
-            if (yMinMax.Min == 0)
-            {
-                yLowerExtent = 0;
-                yUpperExtent = 1;
-            }
-            else if (yMinMax.Min > 0)
-            {
-                yLowerExtent = (float)yMinMax.Min * 2;
-                yUpperExtent = 0;
-            }
-            else
-            {
-                yLowerExtent = 0;
-                yUpperExtent = (float)yMinMax.Min * 2;
-            }
+            // The x-axis would be below the lower extent or above the upper extent of the y-axis, so hide it
+            if (y.LowerExtent > 0 || y.UpperExtent < 0) xAxis.Visible = false;
+            // The x-axis starts off at origin.y so translate it back to screen 0, then translate it to the screen
+            // coordinates of 0 on the y-axis.
+            else xAxis.Translate(new Vector2(0, -origin.y + y.Map(0)));
         }
 
-        xMaxLabel.Text = String.Format("{0:F2}", xMinMax.Max);
-        yMinLabel.Text = String.Format("{0:F2}", yLowerExtent);
-        yMaxLabel.Text = String.Format("{0:F2}", yUpperExtent);
-
-        if (yLowerExtent != 0) xAxis.Translate(new Vector2(0, yLowerExtent * yAxisLen / (yUpperExtent - yLowerExtent)));
-
-        for (int i = 0; i < frames; i++)
+        // Translate the y-axis to 0 on the x-axis
+        if (x.LowerExtent != 0)
         {
-            points.Add(CreatePoint((float)Plot.TranslateX(XSeries[i], origin.x, xAxisLen, 0, 5),
-                    (float)Plot.TranslateY(YSeries[i], origin.y, yAxisLen, yLowerExtent, yUpperExtent)));
+            // The y-axis would be below the lower extent or above the upper extent of the x-axis, so hide it
+            if (x.LowerExtent > 0 || x.UpperExtent < 0) yAxis.Visible = false;
+            // The y-axis starts off at origin.x so translate it back to screen 0, then translate it to the screen
+            // coordinates of 0 on the x-axis.
+            else yAxis.Translate(new Vector2(-origin.x + x.Map(0), 0));
         }
+        else xMinLabel.Visible = false;
+
+        for (int i = 0; i < frames; i++) points.Add(CreatePoint(x.Map(XSeries[i]), y.Map(YSeries[i])));
     }
 
     private void ToggleCrosshair(bool? isActive = null)
@@ -245,7 +218,7 @@ public class Graph : Area2D
         bool isActiveFixed = isActive is null ? !isCrosshairActive : (bool)isActive;
         isCrosshairActive = isActiveFixed;
         crosshair.Visible = isActiveFixed;
-        if (!isCrosshairActive) SetActivePoint();
+        if (!isCrosshairActive) SetActivePoint(-1);
 
     }
 
@@ -275,7 +248,7 @@ public class Graph : Area2D
         crosshairInfo.RectPosition = chiPosition;
         xCrosshair.Position = new Vector2(xCrosshair.Position.x, position.y - origin.y);
         yCrosshair.Position = new Vector2(i * xAxisLen / XSeries.Length, yCrosshair.Position.y);
-        SetActivePoint(points[i]);
+        SetActivePoint(i);
     }
 
     private void HandleInputEvent(Node viewport, InputEvent @event, int shapeId)

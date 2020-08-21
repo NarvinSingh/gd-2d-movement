@@ -5,7 +5,7 @@
 [ext_resource path="res://resources/InfoFont.tres" type="DynamicFont" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 464, 252 )
+extents = Vector2( 464, 248 )
 
 [node name="Graph" type="Area2D"]
 script = ExtResource( 1 )
@@ -75,7 +75,7 @@ __meta__ = {
 [node name="YAxis" type="Node2D" parent="."]
 
 [node name="Axis" type="Line2D" parent="YAxis"]
-points = PoolVector2Array( 64, 536, 64, 32 )
+points = PoolVector2Array( 64, 536, 64, 40 )
 width = 2.0
 
 [node name="Label" type="Label" parent="YAxis"]
@@ -106,9 +106,9 @@ __meta__ = {
 
 [node name="Max" type="Label" parent="YAxis"]
 margin_left = 16.0
-margin_top = 24.0
+margin_top = 32.0
 margin_right = 56.0
-margin_bottom = 48.0
+margin_bottom = 56.0
 grow_horizontal = 0
 text = "max"
 align = 2
@@ -143,7 +143,7 @@ __meta__ = {
 }
 
 [node name="ActionArea" type="CollisionShape2D" parent="."]
-position = Vector2( 528, 284 )
+position = Vector2( 528, 288 )
 shape = SubResource( 1 )
 [connection signal="input_event" from="." to="." method="HandleInputEvent"]
 [connection signal="mouse_exited" from="." to="." method="HandleMouseExited"]

@@ -1,5 +1,4 @@
 using Com.NarvinSingh.Physics;
-using Com.NarvinSingh.Test;
 using Godot;
 using System;
 
@@ -9,24 +8,31 @@ public class KinematicsTest : Carousel
 
     public override void _Ready()
     {
-        GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
-        GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
-        GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
+        //GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
+        //GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
+        //GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
 
-        GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
-        GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
-        GD.Print(Summarize(
-                "KinematicsTest.ItCalculatesTerminalVelocity", Test.KinematicsTest.ItCalculatesTerminalVelocity()));
+        //GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
+        //GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
+        //GD.Print(Summarize(
+        //        "KinematicsTest.ItCalculatesTerminalVelocity", Test.KinematicsTest.ItCalculatesTerminalVelocity()));
 
-        GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
-        GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
+        //GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
+        //GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
 
-        GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
-        GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
-        GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
-        GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
+        //GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
+        //GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
+        //GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
+        //GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
 
         graphScene = (PackedScene)ResourceLoader.Load("res://nodes/Graph.tscn");
+        Graph graph = CreateGraph(new float[][] {
+                new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+                new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } },
+                "0) y = x");
+        graph.XAxisLabel = "x";
+        graph.YAxisLabel = "y";
+        carouselNodes.Add(graph);
         carouselNodes.Add(CreateGraph(GenerateVelocityData(0, 100, 0.01), "1) v0 = 0, a = 100, d = 0.01"));
         carouselNodes.Add(CreateGraph(GenerateVelocityData(0, -100, 0.01), "2) v0 = 0, a = -100, d = 0.01"));
         carouselNodes.Add(CreateGraph(GenerateVelocityData(200, 100, 0.01), "3) v0 = 200, a = 100, d = 0.01"));
@@ -74,7 +80,7 @@ public class KinematicsTest : Carousel
         for (int i = 1; i < frames; i++)
         {
             ts[i] = (float)(i * dt);
-            vs[i] = (float)Kinematics.Velocity(v0, ts[i], a, d);
+            vs[i] = (float)Kinematics.Velocity(ts[i], v0, a, d);
         }
 
         return new float[][] { ts, vs };
