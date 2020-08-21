@@ -1,56 +1,62 @@
 using Com.NarvinSingh.Physics;
+using Com.NarvinSingh.Test;
 using Godot;
 using System;
 
-public class KinematicsTest : Carousel
+public class KinematicsTest : Node2D
 {
+    private Carousel carousel;
     private PackedScene graphScene;
 
     public override void _Ready()
     {
-        //GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
-        //GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
-        //GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
-
-        //GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
-        //GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
-        //GD.Print(Summarize(
-        //        "KinematicsTest.ItCalculatesTerminalVelocity", Test.KinematicsTest.ItCalculatesTerminalVelocity()));
-
-        //GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
-        //GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
-
-        //GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
-        //GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
-        //GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
-        //GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
-
+        carousel = (Carousel)GetNode("Carousel");
         graphScene = (PackedScene)ResourceLoader.Load("res://nodes/Graph.tscn");
+
+        // lib class tests
+        GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
+        GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
+        GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
+
+        GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
+        GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
+        GD.Print(Summarize(
+                "KinematicsTest.ItCalculatesTerminalVelocity", Test.KinematicsTest.ItCalculatesTerminalVelocity()));
+
+        GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
+        GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
+
+        GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
+        GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
+        GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
+        GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
+
+        // Graph tests
         Graph graph;
         graph = CreateGraph(new float[][] { new float[] { }, new float[] { } }, "0a) NULL");
         graph.XAxisLabel = "x";
         graph.YAxisLabel = "y";
-        carouselNodes.Add(graph);
+        carousel.AddNode(graph);
         graph = CreateGraph(new float[][] { new float[] { 1 }, new float[] { 1 } }, "0b) y = 1");
-        carouselNodes.Add(graph);
+        carousel.AddNode(graph);
         graph = CreateGraph(new float[][] {
                 new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
                 new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } },
                 "0c) y = x");
-        carouselNodes.Add(graph);
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(0, 100, 0.01), "1) v0 = 0, a = 100, d = 0.01"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(0, -100, 0.01), "2) v0 = 0, a = -100, d = 0.01"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(200, 100, 0.01), "3) v0 = 200, a = 100, d = 0.01"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(200, -100, 0.01), "4) v0 = 200, a = -100, d = 0.01"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(-200, 100, 0.01), "5) v0 = -200, a = 100, d = 0.01"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(-200, -100, 0.01), "6) v0 = -200, a = -100, d = 0.01"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(0, 100), "7) v0 = 0, a = 100"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(0, -100), "8) v0 = 0, a = -100"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(15, 10), "9) v0 = 15, a = 10"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(15, -10), "10) v0 = 15, a = -10"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(-15, 10), "11) v0 = -15, a = 10"));
-        carouselNodes.Add(CreateGraph(GenerateVelocityData(-15, -10), "12) v0 = -15, a = -10"));
-        SetActiveNode(0);
+        carousel.AddNode(graph);
+        carousel.AddNode(CreateGraph(GenerateVelocityData(0, 100, 0.01), "1) v0 = 0, a = 100, d = 0.01"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(0, -100, 0.01), "2) v0 = 0, a = -100, d = 0.01"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(200, 100, 0.01), "3) v0 = 200, a = 100, d = 0.01"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(200, -100, 0.01), "4) v0 = 200, a = -100, d = 0.01"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(-200, 100, 0.01), "5) v0 = -200, a = 100, d = 0.01"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(-200, -100, 0.01), "6) v0 = -200, a = -100, d = 0.01"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(0, 100), "7) v0 = 0, a = 100"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(0, -100), "8) v0 = 0, a = -100"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(15, 10), "9) v0 = 15, a = 10"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(15, -10), "10) v0 = 15, a = -10"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(-15, 10), "11) v0 = -15, a = 10"));
+        carousel.AddNode(CreateGraph(GenerateVelocityData(-15, -10), "12) v0 = -15, a = -10"));
+        carousel.SetActiveNode(0);
 
         //GD.Print("Goodbye");
         //GetTree().Quit();
