@@ -31,7 +31,7 @@ namespace Com.NarvinSingh.Graphing
             else Init(start, length, SeriesRange.Min * 2, 0, isInverted);
         }
 
-        // Left or bottom end of the axis in screen coordinates 
+        // Left or top end of the axis in screen coordinates 
         public float Start { get; set; }
 
         // 0 on the axis in screen coordinates
@@ -95,7 +95,7 @@ namespace Com.NarvinSingh.Graphing
         // Minimum and maximum points on the axis. Only populated if the axis was created with a series.
         public Range SeriesRange { get; private set; }
 
-        // True if the left of bottom end of the axis is the upper extent
+        // True if the left or top end of the axis is the upper extent
         public bool Inverted { get; set; }
 
         // Unit distance along the axis in screen units
@@ -116,14 +116,14 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
-        // Map a point on the axis to a screen coordinate
+        // Return a screen coordinate given a point on the axis
         public float Map(float value)
         {
             if (!Inverted) return Start + (value - LowerExtent) * UnitLength;
             return Start + Length - (value - LowerExtent) * UnitLength;
         }
 
-        // Map a screen coordinate to a point on the axis
+        // Return a point on the axis given a screen coordinate
         public float Unmap(float coord)
         {
             if (!Inverted) return LowerExtent + (coord - Start) * InverseUnitLength;
