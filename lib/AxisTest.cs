@@ -357,8 +357,8 @@ namespace Com.NarvinSingh.Test
             if (axis.LowerExtent != -5) return false;
             if (axis.UpperExtent != 15) return false;
             if (axis.Inverted) return false;
-            if (axis.Step != 5) return false;
-            if (Round(axis.InverseStep, 3) != 0.2) return false;
+            if (axis.UnitLength != 5) return false;
+            if (Round(axis.InverseUnitLength, 3) != 0.2) return false;
 
             Axis axis2 = new Axis(20, 100, new float[] { -15, 0, 5 });
             if (axis2.Start != 20) return false;
@@ -367,8 +367,8 @@ namespace Com.NarvinSingh.Test
             if (axis2.LowerExtent != -20) return false;
             if (axis2.UpperExtent != 5) return false;
             if (axis2.Inverted) return false;
-            if (axis2.Step != 4) return false;
-            if (Round(axis2.InverseStep, 3) != 0.25) return false;
+            if (axis2.UnitLength != 4) return false;
+            if (Round(axis2.InverseUnitLength, 3) != 0.25) return false;
 
             Axis axis3 = new Axis(20, 100, new float[] { 10, 10, 10 });
             if (axis3.Start != 20) return false;
@@ -377,8 +377,8 @@ namespace Com.NarvinSingh.Test
             if (axis3.LowerExtent != 0) return false;
             if (axis3.UpperExtent != 20) return false;
             if (axis3.Inverted) return false;
-            if (axis3.Step != 5) return false;
-            if (Round(axis3.InverseStep, 3) != 0.2) return false;
+            if (axis3.UnitLength != 5) return false;
+            if (Round(axis3.InverseUnitLength, 3) != 0.2) return false;
 
             Axis axis4 = new Axis(20, 100, new float[] { -10, -10, -10 });
             if (axis4.Start != 20) return false;
@@ -387,8 +387,8 @@ namespace Com.NarvinSingh.Test
             if (axis4.LowerExtent != -20) return false;
             if (axis4.UpperExtent != 0) return false;
             if (axis4.Inverted) return false;
-            if (axis4.Step != 5) return false;
-            if (Round(axis4.InverseStep, 3) != 0.2) return false;
+            if (axis4.UnitLength != 5) return false;
+            if (Round(axis4.InverseUnitLength, 3) != 0.2) return false;
 
             Axis axis5 = new Axis(20, 100, 10, 30);
             if (axis5.Start != 20) return false;
@@ -397,8 +397,8 @@ namespace Com.NarvinSingh.Test
             if (axis5.LowerExtent != 10) return false;
             if (axis5.UpperExtent != 30) return false;
             if (axis5.Inverted) return false;
-            if (axis5.Step != 5) return false;
-            if (Round(axis5.InverseStep, 3) != 0.2) return false;
+            if (axis5.UnitLength != 5) return false;
+            if (Round(axis5.InverseUnitLength, 3) != 0.2) return false;
 
             Axis axis6 = new Axis(20, 100, 10, 30, true);
             if (axis6.Start != 20) return false;
@@ -407,8 +407,8 @@ namespace Com.NarvinSingh.Test
             if (axis6.LowerExtent != 10) return false;
             if (axis6.UpperExtent != 30) return false;
             if (!axis6.Inverted) return false;
-            if (axis6.Step != 5) return false;
-            if (Round(axis6.InverseStep, 3) != 0.2) return false;
+            if (axis6.UnitLength != 5) return false;
+            if (Round(axis6.InverseUnitLength, 3) != 0.2) return false;
 
             Axis axis7 = new Axis(20, 100, -15, 5, true);
             if (axis7.Start != 20) return false;
@@ -417,8 +417,8 @@ namespace Com.NarvinSingh.Test
             if (axis7.LowerExtent != -15) return false;
             if (axis7.UpperExtent != 5) return false;
             if (!axis7.Inverted) return false;
-            if (axis7.Step != 5) return false;
-            if (Round(axis7.InverseStep, 3) != 0.2) return false;
+            if (axis7.UnitLength != 5) return false;
+            if (Round(axis7.InverseUnitLength, 3) != 0.2) return false;
 
             try
             {

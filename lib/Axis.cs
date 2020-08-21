@@ -18,25 +18,33 @@ namespace Com.NarvinSingh.Graphing
         {
             SeriesRange = new Range(series);
 
+            // Non-constant series, so calculate the extents based on the min and max of the series
             if (SeriesRange.Min != SeriesRange.Max)
             {
                 Init(start, length, CalcLowerExtent(SeriesRange.Min), CalcUpperExtent(SeriesRange.Max), isInverted);
             }
+            // Non-negative constant series, so calculate the extents so the constant is above 0 and in the middle of
+            // the range 
             else if (SeriesRange.Min >= 0) Init(start, length, 0, SeriesRange.Max * 2, isInverted);
+            // Negative constant series, so calculate the extents so the constant is below 0 and in the middle of the
+            // range
             else Init(start, length, SeriesRange.Min * 2, 0, isInverted);
         }
 
+        // Left or bottom end of the axis in screen coordinates 
         public float Start { get; set; }
 
+        // 0 on the axis in screen coordinates
         public float Origin
         {
             get
             {
-                if (!Inverted) return Start - LowerExtent * Step;
-                return (Start + Length) + LowerExtent * Step;
+                if (!Inverted) return Start - LowerExtent * UnitLength;
+                return (Start + Length) + LowerExtent * UnitLength;
             }
         }
 
+        // Length of the axis in screen coordinates
         public float Length
         {
             get
@@ -50,6 +58,7 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
+        // Value in axis units of the minimum end of the axis
         public float LowerExtent
         {
             get
@@ -66,6 +75,7 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
+        // Value in axis units of the maximum end of the axis
         public float UpperExtent
         {
             get
@@ -82,11 +92,14 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
+        // Minimum and maximum points on the axis. Only populated if the axis was created with a series.
         public Range SeriesRange { get; private set; }
 
+        // True if the left of bottom end of the axis is the upper extent
         public bool Inverted { get; set; }
 
-        public float Step
+        // Unit distance along the axis in screen units
+        public float UnitLength
         {
             get
             {
@@ -94,7 +107,8 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
-        public float InverseStep
+        // Unit distance on the screen in axis units
+        public float InverseUnitLength
         {
             get
             {
@@ -102,16 +116,18 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
+        // Map a point on the axis to a screen coordinate
         public float Map(float value)
         {
-            if (!Inverted) return Start + (value - LowerExtent) * Step;
-            return Start + Length - (value - LowerExtent) * Step;
+            if (!Inverted) return Start + (value - LowerExtent) * UnitLength;
+            return Start + Length - (value - LowerExtent) * UnitLength;
         }
 
+        // Map a screen coordinate to a point on the axis
         public float Unmap(float coord)
         {
-            if (!Inverted) return LowerExtent + (coord - Start) * InverseStep;
-            return LowerExtent + (Start + Length - coord) * InverseStep;
+            if (!Inverted) return LowerExtent + (coord - Start) * InverseUnitLength;
+            return LowerExtent + (Start + Length - coord) * InverseUnitLength;
         }
 
         public static float CalcLowerExtent(float minValue, int steps = 1)
@@ -124,6 +140,12 @@ namespace Com.NarvinSingh.Graphing
             return CalcExtent(maxValue, false, steps);
         }
 
+        // To calculate the extent:
+        //   1) Get the magnitude of the extema (power of 10), e.g., 0.11 -> 0.1, 2.3 -> 1, 56 -> 10
+        //   2) Multiply the magnitude by the first non-zero digit of the extema, e.g., 0.11 -> 0.1, 2.3 -> 2, 56 -> 50
+        //   3) Round up/down for a max/min in discrete steps, e.g., 1 step rounds between {0,  1}, 2 steps rounds
+        //      between {0, 0.5, 1}, 4 steps rounds between {0, 0.25, 0.5, 0.75, 1}, so using 4 steps we would get for a
+        //      maxima 0.11 -> 0.125, 2.3 -> 2.5, 56 -> 57.5, and for a minima 0.11 -> 0.1, 2.3 -> 2.25, 56 -> 55
         private static float CalcExtent(float value, bool isMin, int steps = 1)
         {
             if (value == 0) return value; // log(0) is undefined so return the correct answer here
