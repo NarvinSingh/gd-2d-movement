@@ -6,11 +6,10 @@ using System.Collections.Generic;
 public class Graph : Area2D
 {
     private const string DEFAULT_POINT_HIGHLIGHT_COLOR = "6680FF";
-    private const float POINT_RADIUS = 4;
-    private const float POINT_SCALE = 1.5F;
+    private const float POINT_SCALE = 1.2F;
     private const float CHI_OFFSET = 6;
 
-    private bool isReady = false;
+    private bool isReady;
     private string title;
     private string xAxisLabel;
     private string yAxisLabel;
@@ -36,13 +35,12 @@ public class Graph : Area2D
     private float chiExpMgnLeft;
     private float chiExpMgnBtm;
     private float chiExpMgnRight;
-    private bool isCrosshairActive = false;
+    private bool isCrosshairActive;
     private PackedScene point;
     private Color pointColor;
-    private float pointRadius;
     private List<Sprite> points;
-    private Sprite activePoint = null;
-    private Vector2 pointScale = new Vector2(POINT_SCALE, POINT_SCALE);
+    private Vector2 pointScale;
+    private Sprite activePoint;
 
     [Export]
     public string Title
@@ -96,7 +94,7 @@ public class Graph : Area2D
     {
         isReady = true;
 
-        // Child nodes
+        // Get child nodes
         titleLabel = (Label)GetNode("Title");
         xAxis = (Node2D)GetNode("XAxis");
         xLine = (Line2D)GetNode("XAxis/Axis");
@@ -113,6 +111,11 @@ public class Graph : Area2D
         yCrosshair = (Line2D)GetNode("Crosshair/YCrosshair");
         crosshairInfo = (Label)GetNode("Crosshair/Info");
         StyleBoxFlat chiStyleBox = (StyleBoxFlat)crosshairInfo.GetStylebox("normal");
+
+        // Initialize class variables
+        origin = xLine.Points[0];
+        xAxisLen = origin.DistanceTo(xLine.Points[1]);
+        yAxisLen = origin.DistanceTo(yLine.Points[1]);
         chiExpMgnTop = chiStyleBox.ExpandMarginTop;
         chiExpMgnLeft = chiStyleBox.ExpandMarginLeft;
         chiExpMgnBtm = chiStyleBox.ExpandMarginBottom;
@@ -122,11 +125,7 @@ public class Graph : Area2D
         pointColor = tempPoint.Modulate;
         tempPoint.QueueFree();
         points = new List<Sprite>();
-
-        // Class variables
-        origin = xLine.Points[0];
-        xAxisLen = origin.DistanceTo(xLine.Points[1]);
-        yAxisLen = origin.DistanceTo(yLine.Points[1]);
+        pointScale = new Vector2(POINT_SCALE, POINT_SCALE);
 
         // Initialize child nodes
         titleLabel.Text = title;
@@ -144,29 +143,6 @@ public class Graph : Area2D
         return newPoint;
     }
 
-    private void SetActivePoint(int i)
-    {
-        Sprite point = i >= 0 && i < points.Count ? points[i] : null;
-
-        if (activePoint == point) return;
-
-        if (!(activePoint is null))
-        {
-            activePoint.Scale = Vector2.One;
-            activePoint.Modulate = pointColor;
-            activePoint.ZIndex = 0;
-        }
-
-        activePoint = point;
-
-        if (!(activePoint is null))
-        {
-            activePoint.Scale = pointScale;
-            activePoint.Modulate = HighlightColor;
-            activePoint.ZIndex = 1;
-        }
-    }
-
     private void Erase()
     {
         if (points is null) return;
@@ -181,8 +157,21 @@ public class Graph : Area2D
         Erase();
 
         int frames = XSeries.Length;
-        Axis x = new Axis(origin.x, xAxisLen, XSeries);
-        Axis y = new Axis(origin.y - yAxisLen, yAxisLen, YSeries, true);
+        Axis x;
+        Axis y;
+
+        // Graph has data
+        if (XSeries.Length > 0)
+        {
+            x = new Axis(origin.x, xAxisLen, XSeries);
+            y = new Axis(origin.y - yAxisLen, yAxisLen, YSeries, true);
+        }
+        // Graph has no data so use default extents
+        else
+        {
+            x = new Axis(origin.x, xAxisLen, 0, 1);
+            y = new Axis(origin.y - yAxisLen, yAxisLen, 0, 1, true);
+        }
 
         xMinLabel.Text = String.Format("{0:F2}", x.LowerExtent);
         xMaxLabel.Text = String.Format("{0:F2}", x.UpperExtent);
@@ -213,6 +202,29 @@ public class Graph : Area2D
         for (int i = 0; i < frames; i++) points.Add(CreatePoint(x.Map(XSeries[i]), y.Map(YSeries[i])));
     }
 
+    private void SetActivePoint(int i)
+    {
+        Sprite point = i >= 0 && i < points.Count ? points[i] : null;
+
+        if (activePoint == point) return;
+
+        if (!(activePoint is null))
+        {
+            activePoint.Scale = Vector2.One;
+            activePoint.Modulate = pointColor;
+            activePoint.ZIndex = 0;
+        }
+
+        activePoint = point;
+
+        if (!(activePoint is null))
+        {
+            activePoint.Scale = pointScale;
+            activePoint.Modulate = HighlightColor;
+            activePoint.ZIndex = 1;
+        }
+    }
+
     private void ToggleCrosshair(bool? isActive = null)
     {
         bool isActiveFixed = isActive is null ? !isCrosshairActive : (bool)isActive;
@@ -224,15 +236,47 @@ public class Graph : Area2D
 
     private void PlaceCrosshair(Vector2 position)
     {
-        int i = Math.Min(
-                Math.Max(Convert.ToInt32(XSeries.Length * (position.x - origin.x + POINT_RADIUS) / xAxisLen) - 1, 0),
-                XSeries.Length - 1);
-        string xValue = i >= 0 && i < XSeries.Length ? String.Format("{0:F2}", XSeries[i]) : "N/A";
-        string yValue = i >= 0 && i < YSeries.Length ? String.Format("{0:F2}", YSeries[i]) : "N/A";
         Vector2 chiPosition = position;
 
-        crosshairInfo.Text = String.Format("{0,8}: {1,6}\n{2,8}: {3,6}", xAxisLabel, xValue, yAxisLabel, yValue);
+        // Graph has data
+        if (XSeries.Length > 0)
+        {
+            int i;
+            float yCrosshairPosX;
 
+            // Graph has more than one point, so get the point from the cursor x position and snap
+            if (XSeries.Length > 1)
+            {
+                i = Math.Min(
+                    Math.Max(Convert.ToInt32((XSeries.Length - 1) * (position.x - origin.x) / xAxisLen), 0),
+                    XSeries.Length - 1);
+                yCrosshairPosX = i * xAxisLen / (XSeries.Length - 1);
+            }
+            // Graph has only one point in the middle of itself
+            else
+            {
+                i = 0;
+                yCrosshairPosX = xAxisLen / 2;
+            }
+
+            // Set crosshair info text to info about the point, set the crosshair position and active point
+            crosshairInfo.Text = String.Format("{0,8}: {1,6}\n{2,8}: {3,6}",
+                    xAxisLabel, i >= 0 && i < XSeries.Length ? String.Format("{0:F2}", XSeries[i]) : "N/A",
+                    yAxisLabel, i >= 0 && i < YSeries.Length ? String.Format("{0:F2}", YSeries[i]) : "N/A");
+            xCrosshair.Position = new Vector2(xCrosshair.Position.x, position.y - origin.y);
+            yCrosshair.Position = new Vector2(yCrosshairPosX, yCrosshair.Position.y);
+            SetActivePoint(i);
+        }
+        // Graph has no data
+        else
+        {
+            // Set crosshair info text to info about the cursor, set the crosshair position and active point
+            xCrosshair.Position = new Vector2(xCrosshair.Position.x, position.y - origin.y);
+            yCrosshair.Position = new Vector2(position.x - origin.x, yCrosshair.Position.y);
+            crosshairInfo.Text = String.Format("Cursor: {0}", position);
+        }
+
+        // Crosshair info position is set now because it depends on the text that was set above
         if (position.x + crosshairInfo.RectSize.x + chiExpMgnLeft + chiExpMgnRight + CHI_OFFSET <= origin.x + xAxisLen)
         {
             chiPosition.x += chiExpMgnLeft + CHI_OFFSET;
@@ -246,9 +290,6 @@ public class Graph : Area2D
         else chiPosition.y += chiExpMgnTop + CHI_OFFSET;
 
         crosshairInfo.RectPosition = chiPosition;
-        xCrosshair.Position = new Vector2(xCrosshair.Position.x, position.y - origin.y);
-        yCrosshair.Position = new Vector2(i * xAxisLen / XSeries.Length, yCrosshair.Position.y);
-        SetActivePoint(i);
     }
 
     private void HandleInputEvent(Node viewport, InputEvent @event, int shapeId)
@@ -260,12 +301,6 @@ public class Graph : Area2D
             if (isCrosshairActive) PlaceCrosshair(mouseClick.Position);
         }
         else if (@event is InputEventMouseMotion mouseMove && isCrosshairActive) PlaceCrosshair(mouseMove.Position);
-        if (@event is InputEventMouseButton mouseClick2 && mouseClick2.ButtonIndex == (int)ButtonList.Right
-                && mouseClick2.Pressed)
-        {
-            XSeries = new float[] { 0, 1, 2, 3, 4 };
-            YSeries = new float[] { 0, 1, 4, 9, 16 };
-        }
     }
 
     private void HandleMouseExited()

@@ -26,12 +26,17 @@ public class KinematicsTest : Carousel
         //GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
 
         graphScene = (PackedScene)ResourceLoader.Load("res://nodes/Graph.tscn");
-        Graph graph = CreateGraph(new float[][] {
-                new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
-                new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } },
-                "0) y = x");
+        Graph graph;
+        graph = CreateGraph(new float[][] { new float[] { }, new float[] { } }, "0a) NULL");
         graph.XAxisLabel = "x";
         graph.YAxisLabel = "y";
+        carouselNodes.Add(graph);
+        graph = CreateGraph(new float[][] { new float[] { 1 }, new float[] { 1 } }, "0b) y = 1");
+        carouselNodes.Add(graph);
+        graph = CreateGraph(new float[][] {
+                new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+                new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } },
+                "0c) y = x");
         carouselNodes.Add(graph);
         carouselNodes.Add(CreateGraph(GenerateVelocityData(0, 100, 0.01), "1) v0 = 0, a = 100, d = 0.01"));
         carouselNodes.Add(CreateGraph(GenerateVelocityData(0, -100, 0.01), "2) v0 = 0, a = -100, d = 0.01"));
