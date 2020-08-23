@@ -1,15 +1,17 @@
 [gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://nodes/Graph.cs" type="Script" id=1]
 [ext_resource path="res://resources/InfoStyleBox.tres" type="StyleBox" id=2]
 [ext_resource path="res://resources/InfoFont.tres" type="DynamicFont" id=3]
+[ext_resource path="res://nodes/Graph.cs" type="Script" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 464, 248 )
+extents = Vector2( 472, 256 )
 
-[node name="Graph" type="Area2D"]
-script = ExtResource( 1 )
-Title = "Title"
+[node name="Graph" type="Node2D"]
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="Title" type="Label" parent="."]
 anchor_left = 0.5
@@ -25,32 +27,41 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="XAxis" type="Node2D" parent="."]
+[node name="Plot" type="Area2D" parent="."]
+position = Vector2( 64, 40 )
 
-[node name="Axis" type="Line2D" parent="XAxis"]
-points = PoolVector2Array( 64, 536, 992, 536 )
+[node name="XAxis" type="Node2D" parent="Plot"]
+
+[node name="Axis" type="Line2D" parent="Plot/XAxis"]
+points = PoolVector2Array( 0, 0, 928, 0 )
 width = 2.0
 default_color = Color( 0.4, 0.501961, 1, 1 )
 
-[node name="Label" type="Label" parent="XAxis"]
+[node name="Topmost" type="Node2D" parent="Plot/XAxis"]
+position = Vector2( -64, -40 )
+z_index = 1
+
+[node name="Label" type="Label" parent="Plot/XAxis/Topmost"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-margin_left = 496.0
-margin_top = 560.0
-margin_right = 528.0
-margin_bottom = 574.0
+margin_left = 528.0
+margin_top = 64.0
+margin_right = 560.0
+margin_bottom = 88.0
 text = "Time"
+align = 1
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Min" type="Label" parent="XAxis"]
+[node name="Min" type="Label" parent="Plot/XAxis/Topmost"]
 margin_left = 32.0
-margin_top = 536.0
+margin_top = 40.0
 margin_right = 96.0
-margin_bottom = 560.0
+margin_bottom = 64.0
 grow_horizontal = 2
 text = "min"
 align = 1
@@ -59,11 +70,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Max" type="Label" parent="XAxis"]
+[node name="Max" type="Label" parent="Plot/XAxis/Topmost"]
 margin_left = 960.0
-margin_top = 536.0
+margin_top = 40.0
 margin_right = 1024.0
-margin_bottom = 560.0
+margin_bottom = 64.0
 grow_horizontal = 2
 text = "max"
 align = 1
@@ -72,30 +83,36 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="YAxis" type="Node2D" parent="."]
+[node name="YAxis" type="Node2D" parent="Plot"]
 
-[node name="Axis" type="Line2D" parent="YAxis"]
-points = PoolVector2Array( 64, 536, 64, 40 )
+[node name="Axis" type="Line2D" parent="Plot/YAxis"]
+points = PoolVector2Array( 0, 0, 0, 496 )
 width = 2.0
 
-[node name="Label" type="Label" parent="YAxis"]
+[node name="Topmost" type="Node2D" parent="Plot/YAxis"]
+position = Vector2( -64, -40 )
+z_index = 1
+
+[node name="Label" type="Label" parent="Plot/YAxis/Topmost"]
 anchor_top = 0.5
 anchor_bottom = 0.5
-margin_left = 24.0
-margin_top = 293.0
-margin_right = 75.0
-margin_bottom = 307.0
+margin_left = 16.0
+margin_top = 288.0
+margin_right = 67.0
+margin_bottom = 312.0
 rect_rotation = -90.0
 text = "Velocity"
+align = 1
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Min" type="Label" parent="YAxis"]
+[node name="Min" type="Label" parent="Plot/YAxis/Topmost"]
 margin_left = 16.0
 margin_top = 520.0
 margin_right = 56.0
-margin_bottom = 544.0
+margin_bottom = 552.0
 grow_horizontal = 0
 text = "min"
 align = 2
@@ -104,9 +121,9 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Max" type="Label" parent="YAxis"]
+[node name="Max" type="Label" parent="Plot/YAxis/Topmost"]
 margin_left = 16.0
-margin_top = 32.0
+margin_top = 24.0
 margin_right = 56.0
 margin_bottom = 56.0
 grow_horizontal = 0
@@ -117,33 +134,31 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Crosshair" type="Node2D" parent="."]
+[node name="Crosshair" type="Node2D" parent="Plot"]
 visible = false
 
-[node name="XCrosshair" type="Line2D" parent="Crosshair"]
-points = PoolVector2Array( 64, 536, 992, 536 )
+[node name="XLine" type="Line2D" parent="Plot/Crosshair"]
+points = PoolVector2Array( 0, 0, 928, 0 )
 width = 1.0
 default_color = Color( 0.8, 0.8, 0.8, 1 )
 
-[node name="YCrosshair" type="Line2D" parent="Crosshair"]
-points = PoolVector2Array( 64, 536, 64, 32 )
+[node name="YLine" type="Line2D" parent="Plot/Crosshair"]
+points = PoolVector2Array( 0, 0, 0, 496 )
 width = 1.0
 default_color = Color( 0.8, 0.8, 0.8, 1 )
 
-[node name="Info" type="Label" parent="Crosshair"]
-margin_left = 72.0
-margin_top = 512.0
-margin_right = 114.0
-margin_bottom = 531.0
+[node name="Info" type="Label" parent="Plot/Crosshair"]
+margin_right = 42.0
+margin_bottom = 19.0
 custom_styles/normal = ExtResource( 2 )
 custom_fonts/font = ExtResource( 3 )
-text = "info"
+text = "Info"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ActionArea" type="CollisionShape2D" parent="."]
-position = Vector2( 528, 288 )
+[node name="InputArea" type="CollisionShape2D" parent="Plot"]
+position = Vector2( 464, 248 )
 shape = SubResource( 1 )
-[connection signal="input_event" from="." to="." method="HandleInputEvent"]
-[connection signal="mouse_exited" from="." to="." method="HandleMouseExited"]
+[connection signal="input_event" from="Plot" to="." method="HandleInputEvent"]
+[connection signal="mouse_exited" from="Plot" to="." method="HandleMouseExited"]
