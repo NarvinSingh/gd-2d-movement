@@ -12,6 +12,7 @@ script = ExtResource( 4 )
 __meta__ = {
 "_edit_group_": true
 }
+Series = PoolVector2Array(  )
 
 [node name="Title" type="Label" parent="."]
 anchor_left = 0.5
