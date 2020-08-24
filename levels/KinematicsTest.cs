@@ -48,7 +48,7 @@ public class KinematicsTest : Node2D
         carousel.AddNode(CreateGraph(new float[][] {
                 new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
                 new float[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } },
-                "10) y = 1", "x", "y"));
+                "10) y = 1", "x", "y", true, false));
         carousel.AddNode(CreateGraph(new float[][] {
                 new float[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
                 new float[] { -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } },

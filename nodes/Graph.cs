@@ -385,8 +385,11 @@ public class Graph : Node2D
             // Set crosshair info text, crosshair line positions and active point
             crosshairInfo.Text = String.Format("{0,8}: {1,6}\n{2,8}: {3,6}",
                     xAxisLabel, String.Format("{0:F2}", Series[i].x), yAxisLabel, String.Format("{0:F2}", Series[i].y));
-            xCrosshair.Position = new Vector2(xCrosshair.Position.x, YSnap ? axisY.Map(Series[i].y) : plotPos.y);
-            yCrosshair.Position = new Vector2(XSnap ? axisX.Map(Series[i].x) : plotPos.x, yCrosshair.Position.y);
+            xCrosshair.Position = new Vector2(xCrosshair.Position.x,
+                    YSnap ? axisY.Map(Series[i].y) : Math.Min(Math.Max(0, plotPos.y), axisY.Length));
+            yCrosshair.Position = new Vector2(
+                    XSnap ? axisX.Map(Series[i].x) : Math.Min(Math.Max(0, plotPos.x), axisX.Length),
+                    yCrosshair.Position.y);
             SetActivePoint(i);
         }
         // Graph has no data
@@ -395,8 +398,8 @@ public class Graph : Node2D
             // Set crosshair info text and crosshair line positions
             crosshairInfo.Text = String.Format("Cursor: {0}\nPoint:  ({1:F2}, {2:F2})",
                     plotPos, axisX.Unmap(plotPos.x), axisY.Unmap(plotPos.y));
-            xCrosshair.Position = new Vector2(xCrosshair.Position.x, plotPos.y);
-            yCrosshair.Position = new Vector2(plotPos.x, yCrosshair.Position.y);
+            xCrosshair.Position = new Vector2(xCrosshair.Position.x, Math.Min(Math.Max(0, plotPos.y), axisY.Length));
+            yCrosshair.Position = new Vector2(Math.Min(Math.Max(0, plotPos.x), axisX.Length), yCrosshair.Position.y);
         }
 
         // Set crosshair info position now that the text, which changes the size, has been set
