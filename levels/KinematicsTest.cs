@@ -1,5 +1,4 @@
 using Com.NarvinSingh.Physics;
-using Com.NarvinSingh.Test;
 using Godot;
 using System;
 
@@ -114,12 +113,15 @@ public class KinematicsTest : Node2D
             string yLabel = "Velocity", bool xSnap = true, bool ySnap = true)
     {
         Graph graph = (Graph)graphScene.Instance();
+        int seriesLen = xSeries.Length;
+        Vector2[] series = new Vector2[seriesLen];
 
+        for (int i = 0; i < seriesLen; i++) series[i] = new Vector2(xSeries[i], ySeries[i]);
+
+        graph.Series = series;
         graph.Title = title;
         graph.XAxisLabel = xLabel;
         graph.YAxisLabel = yLabel;
-        graph.XSeries = xSeries;
-        graph.YSeries = ySeries;
         graph.XSnap = xSnap;
         graph.YSnap = ySnap;
 
