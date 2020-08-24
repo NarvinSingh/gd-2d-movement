@@ -11,10 +11,13 @@ public class Graph : Node2D
 
     private static readonly Comparer<Vector2> seriesComparer = Comparer<Vector2>.Create((a, b) => a.x.CompareTo(b.x));
 
+    // Property backing fields
     private string title;
     private string xAxisLabel;
     private string yAxisLabel;
     private Vector2[] series;
+
+    // Child nodes
     private Label titleLabel;
     private Area2D plot;
     private Node2D xAxis;
@@ -31,9 +34,9 @@ public class Graph : Node2D
     private Line2D xCrosshair;
     private Line2D yCrosshair;
     private Label crosshairInfo;
+
+    // Other class variables
     private Vector2 origin;
-    private Axis axisX;
-    private Axis axisY;
     private float xAxisLen;
     private float yAxisLen;
     private float chiExpMgnTop;
@@ -42,11 +45,14 @@ public class Graph : Node2D
     private float chiExpMgnRight;
     private bool isCrosshairActive;
     private bool isReady;
-    private List<Sprite> points;
-    private Sprite activePoint;
     private PackedScene point;
     private Color pointColor;
     private Vector2 pointScale;
+    private List<Sprite> points;
+    private Sprite activePoint;
+    private Com.NarvinSingh.Graphing.Range yRange;
+    private Axis axisX;
+    private Axis axisY;
 
     [Export]
     public string Title
@@ -87,8 +93,22 @@ public class Graph : Node2D
         get { return series; }
         set
         {
+            // Store a copy of the array sorted by x values
             series = (Vector2[])value.Clone();
             Array.Sort(Series, seriesComparer);
+
+            // Since the y values are not sorted, get the range
+            int seriesLength = series.Length;
+
+            if (seriesLength > 0)
+            {
+                float[] ySeries = new float[Series.Length];
+
+                for (int i = 0; i < seriesLength; i++) ySeries[i] = series[i].y;
+
+                yRange = new Com.NarvinSingh.Graphing.Range(ySeries);
+            }
+            else yRange = null;
         }
     }
 
@@ -121,7 +141,7 @@ public class Graph : Node2D
         crosshairInfo = (Label)GetNode("Plot/Crosshair/Info");
         StyleBoxFlat chiStyleBox = (StyleBoxFlat)crosshairInfo.GetStylebox("normal");
 
-        // Initialize class variables
+        // Initialize other class variables
         origin = plot.Position;
         xAxisLen = xLine.Points[0].DistanceTo(xLine.Points[1]);
         yAxisLen = yLine.Points[0].DistanceTo(yLine.Points[1]);
@@ -133,8 +153,8 @@ public class Graph : Node2D
         Sprite tempPoint = (Sprite)point.Instance();
         pointColor = tempPoint.Modulate;
         tempPoint.QueueFree();
-        points = new List<Sprite>();
         pointScale = new Vector2(POINT_SCALE, POINT_SCALE);
+        points = new List<Sprite>();
 
         // Initialize child nodes
         titleLabel.Text = title;
@@ -157,19 +177,18 @@ public class Graph : Node2D
         if (!isReady || Series is null) return;
 
         // Destroy the current points
-        if (!(points is null))
-        {
-            points.ForEach((point) => point.QueueFree());
-            points.Clear();
-        }
+        points.ForEach((point) => point.QueueFree());
+        points.Clear();
 
         // Graph has data
-        if (Series.Length > 0)
-        {
-            int lastIndex = Series.Length - 1;
+        int seriesLength = Series.Length;
 
-            axisX = new Axis(0, xAxisLen, Series[0].x, Series[lastIndex].x);
-            axisY = new Axis(0, yAxisLen, Series[0].y, Series[lastIndex].y, true);
+        if (seriesLength > 0)
+        {
+            // Use the Axis constructor that takes an array so the extents will be calculated, including when the
+            // range is 0 (min = max)
+            axisX = new Axis(0, xAxisLen, new float[] { Series[0].x, Series[Series.Length - 1].x });
+            axisY = new Axis(0, yAxisLen, new float[] { yRange.Min, yRange.Max }, true);
         }
         // Graph has no data so use default extents
         else
@@ -251,13 +270,15 @@ public class Graph : Node2D
     private int GetXSnapIndex(float xPosition)
     {
         float value = axisX.Unmap(xPosition);
-
         int index = Array.BinarySearch(Series, new Vector2(value, 0), seriesComparer);
 
         if (index >= 0) return index; // Exact value found
 
         index = ~index; // Index of first item that is greater than value
 
+        // Value is less than all items, so return first item. This happens because xPosition was just to the left of 0,
+        // so index was ~0 or "negative 0", which becomes 0 after we do ~index.
+        if (index == 0) return 0;
         if (index >= Series.Length) return Series.Length - 1; // Value is greater than all items, so return last item
 
         // Value is between two items so pick the closer item
@@ -354,14 +375,14 @@ public class Graph : Node2D
             // Graph has more than one point, so get the point from the cursor x position and snap
             if (Series.Length > 1)
             {
-                if (XSnap && !YSnap) i = GetXSnapIndex(axisX.Unmap(plotPos.x));
-                else if (!XSnap && YSnap) i = GetYSnapIndex(axisY.Unmap(plotPos.y));
+                if (XSnap && !YSnap) i = GetXSnapIndex(plotPos.x);
+                else if (!XSnap && YSnap) i = GetYSnapIndex(plotPos.y);
                 else i = GetSnapIndex(plotPos);
             }
-            // Graph has only one point in the middle of itself
+            // Graph has only one point in the middle of the plot
             else i = 0;
 
-            // Set crosshair info text to info about the point, set the crosshair position and active point
+            // Set crosshair info text, crosshair line positions and active point
             crosshairInfo.Text = String.Format("{0,8}: {1,6}\n{2,8}: {3,6}",
                     xAxisLabel, String.Format("{0:F2}", Series[i].x), yAxisLabel, String.Format("{0:F2}", Series[i].y));
             xCrosshair.Position = new Vector2(xCrosshair.Position.x, YSnap ? axisY.Map(Series[i].y) : plotPos.y);
@@ -371,30 +392,31 @@ public class Graph : Node2D
         // Graph has no data
         else
         {
-            // Set crosshair info text to info about the cursor, and set the crosshair position
-            xCrosshair.Position = new Vector2(xCrosshair.Position.x, plotPos.y);
-            yCrosshair.Position = new Vector2(plotPos.x, yCrosshair.Position.y);
+            // Set crosshair info text and crosshair line positions
             crosshairInfo.Text = String.Format("Cursor: {0}\nPoint:  ({1:F2}, {2:F2})",
                     plotPos, axisX.Unmap(plotPos.x), axisY.Unmap(plotPos.y));
+            xCrosshair.Position = new Vector2(xCrosshair.Position.x, plotPos.y);
+            yCrosshair.Position = new Vector2(plotPos.x, yCrosshair.Position.y);
         }
 
-        crosshairInfo.Text = String.Format("{0}\n-DEBUG-\nWindow Pos: {1}\nPlot Pos:   ({2}, {3})",
-                crosshairInfo.Text, position, plotPos.x, plotPos.y);
+        // Set crosshair info position now that the text, which changes the size, has been set
+        // The info box starts of to the right the vertical crosshair and below the horizontal crosshair
+        Vector2 chiPosition = plotPos;
 
-        // Crosshair info position is set now because it depends on the text that was set above
-        //Vector2 chiPosition = position;
-        Vector2 chiPosition = new Vector2(yCrosshair.Position.x + origin.x, xCrosshair.Position.y + origin.y);
-
-        if (position.x + crosshairInfo.RectSize.x + chiExpMgnLeft + chiExpMgnRight + CHI_OFFSET <= origin.x + xAxisLen)
+        // Box width + margin + padding is left of right edge of plot so shift it to clear the left margin + padding
+        if (plotPos.x + crosshairInfo.RectSize.x + chiExpMgnLeft + chiExpMgnRight + CHI_OFFSET <= xAxisLen)
         {
             chiPosition.x += chiExpMgnLeft + CHI_OFFSET;
         }
+        // Box width + margin + padding is beyond right edge plot so shift it to the left of the vertical crosshair
         else chiPosition.x -= crosshairInfo.RectSize.x + chiExpMgnRight + CHI_OFFSET;
 
-        if (position.y - crosshairInfo.RectSize.y - chiExpMgnTop - chiExpMgnBtm - CHI_OFFSET >= origin.y - yAxisLen)
+        // Box width + margin + padding is below top edge plot so shift it to clear the bottom margin + padding
+        if (plotPos.y - crosshairInfo.RectSize.y - chiExpMgnTop - chiExpMgnBtm - CHI_OFFSET >= 0)
         {
             chiPosition.y -= crosshairInfo.RectSize.y + chiExpMgnBtm + CHI_OFFSET;
         }
+        // Box width + margin + padding is beyond top edge plot so shift it to below the horizontal crosshair
         else chiPosition.y += chiExpMgnTop + CHI_OFFSET;
 
         crosshairInfo.RectPosition = chiPosition;
@@ -409,7 +431,8 @@ public class Graph : Node2D
             if (isCrosshairActive) PlaceCrosshair(mouseClick.Position);
         }
         else if (@event is InputEventMouseMotion mouseMove && isCrosshairActive) PlaceCrosshair(mouseMove.Position);
-        else if (@event is InputEventMouseButton mouseClick2 && mouseClick2.ButtonIndex == (int)ButtonList.Right && mouseClick2.Pressed)
+        else if (@event is InputEventMouseButton debugClick && debugClick.ButtonIndex == (int)ButtonList.Right
+                && debugClick.Pressed)
         {
             //XSnap = !XSnap;
             //YSnap = !YSnap;
@@ -418,6 +441,7 @@ public class Graph : Node2D
             float[] ySeries = new float[] { 25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25 };
             Vector2[] newSeries = new Vector2[xSeries.Length];
             for (int i = 0; i < xSeries.Length; i++) newSeries[i] = new Vector2(xSeries[i], ySeries[i]);
+            Series = newSeries;
             Draw();
         }
     }
