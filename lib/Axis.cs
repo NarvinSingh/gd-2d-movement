@@ -16,19 +16,19 @@ namespace Com.NarvinSingh.Graphing
 
         public Axis(float start, float length, float[] series, bool isInverted = false)
         {
-            SeriesRange = new Range(series);
+            Range range = new Range(series);
 
             // Non-constant series, so calculate the extents based on the min and max of the series
-            if (SeriesRange.Min != SeriesRange.Max)
+            if (range.Min != range.Max)
             {
-                Init(start, length, CalcLowerExtent(SeriesRange.Min), CalcUpperExtent(SeriesRange.Max), isInverted);
+                Init(start, length, CalcLowerExtent(range.Min), CalcUpperExtent(range.Max), isInverted);
             }
             // Non-negative constant series, so calculate the extents so the constant is above 0 and in the middle of
             // the range 
-            else if (SeriesRange.Min >= 0) Init(start, length, 0, SeriesRange.Max * 2, isInverted);
+            else if (range.Min >= 0) Init(start, length, 0, range.Max * 2, isInverted);
             // Negative constant series, so calculate the extents so the constant is below 0 and in the middle of the
             // range
-            else Init(start, length, SeriesRange.Min * 2, 0, isInverted);
+            else Init(start, length, range.Min * 2, 0, isInverted);
         }
 
         // Left or top end of the axis in screen coordinates 
@@ -91,9 +91,6 @@ namespace Com.NarvinSingh.Graphing
                 upperExtent = value;
             }
         }
-
-        // Minimum and maximum points on the axis. Only populated if the axis was created with a series.
-        public Range SeriesRange { get; private set; }
 
         // True if the left or top end of the axis is the upper extent
         public bool Inverted { get; set; }
