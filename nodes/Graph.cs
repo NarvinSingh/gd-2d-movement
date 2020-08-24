@@ -401,10 +401,10 @@ public class Graph : Node2D
 
         // Set crosshair info position now that the text, which changes the size, has been set
         // The info box starts of to the right the vertical crosshair and below the horizontal crosshair
-        Vector2 chiPosition = plotPos;
+        Vector2 chiPosition = new Vector2(yCrosshair.Position.x, xCrosshair.Position.y);
 
         // Box width + margin + padding is left of right edge of plot so shift it to clear the left margin + padding
-        if (plotPos.x + crosshairInfo.RectSize.x + chiExpMgnLeft + chiExpMgnRight + CHI_OFFSET <= xAxisLen)
+        if (chiPosition.x + crosshairInfo.RectSize.x + chiExpMgnLeft + chiExpMgnRight + CHI_OFFSET <= xAxisLen)
         {
             chiPosition.x += chiExpMgnLeft + CHI_OFFSET;
         }
@@ -412,7 +412,7 @@ public class Graph : Node2D
         else chiPosition.x -= crosshairInfo.RectSize.x + chiExpMgnRight + CHI_OFFSET;
 
         // Box width + margin + padding is below top edge plot so shift it to clear the bottom margin + padding
-        if (plotPos.y - crosshairInfo.RectSize.y - chiExpMgnTop - chiExpMgnBtm - CHI_OFFSET >= 0)
+        if (chiPosition.y - crosshairInfo.RectSize.y - chiExpMgnTop - chiExpMgnBtm - CHI_OFFSET >= 0)
         {
             chiPosition.y -= crosshairInfo.RectSize.y + chiExpMgnBtm + CHI_OFFSET;
         }
