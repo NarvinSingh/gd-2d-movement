@@ -9,11 +9,13 @@ namespace Com.NarvinSingh.Graphing
         private float lowerExtent;
         private float upperExtent;
 
+        // Specify the extents
         public Axis(float start, float length, float lowerExtent, float upperExtent, bool isInverted = false)
         {
             Init(start, length, lowerExtent, upperExtent, isInverted);
         }
 
+        // Calculate the extents based on the series
         public Axis(float start, float length, float[] series, bool isInverted = false)
         {
             Range range = new Range(series);
@@ -113,14 +115,14 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
-        // Return a screen coordinate given a point on the axis
+        // Return a screen coordinate given a value on the axis
         public float Map(float value)
         {
             if (!Inverted) return Start + (value - LowerExtent) * UnitLength;
             return Start + Length - (value - LowerExtent) * UnitLength;
         }
 
-        // Return a point on the axis given a screen coordinate
+        // Return a value on the axis given a screen coordinate
         public float Unmap(float coord)
         {
             if (!Inverted) return LowerExtent + (coord - Start) * InverseUnitLength;
