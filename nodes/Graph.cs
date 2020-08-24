@@ -9,9 +9,12 @@ public class Graph : Node2D
     private const float POINT_SCALE = 1.2F;
     private const float CHI_OFFSET = 6;
 
+    private static Comparer<Vector2> seriesComparer = Comparer<Vector2>.Create((a, b) => a.x.CompareTo(b.x));
+
     private string title;
     private string xAxisLabel;
     private string yAxisLabel;
+    private Vector2[] series;
     private Label titleLabel;
     private Area2D plot;
     private Node2D xAxis;
@@ -48,10 +51,7 @@ public class Graph : Node2D
     [Export]
     public string Title
     {
-        get
-        {
-            return title;
-        }
+        get { return title; }
         set
         {
             title = value;
@@ -62,10 +62,7 @@ public class Graph : Node2D
     [Export]
     public string XAxisLabel
     {
-        get
-        {
-            return xAxisLabel;
-        }
+        get { return xAxisLabel; }
         set
         {
             xAxisLabel = value;
@@ -76,10 +73,7 @@ public class Graph : Node2D
     [Export]
     public string YAxisLabel
     {
-        get
-        {
-            return yAxisLabel;
-        }
+        get { return yAxisLabel; }
         set
         {
             yAxisLabel = value;
@@ -87,9 +81,16 @@ public class Graph : Node2D
         }
     }
 
-    [Export] public float[] XSeries { get; set; }
-
-    [Export] public float[] YSeries { get; set; }
+    [Export]
+    public Vector2[] Series
+    {
+        get { return series; }
+        set
+        {
+            series = (Vector2[])value.Clone();
+            Array.Sort(Series, seriesComparer);
+        }
+    }
 
     [Export] public bool XSnap { get; set; } = false;
 
@@ -153,7 +154,7 @@ public class Graph : Node2D
 
     private void Draw()
     {
-        if (!isReady || XSeries is null || YSeries is null || XSeries.Length != YSeries.Length) return;
+        if (!isReady || Series is null) return;
 
         // Destroy the current points
         if (!(points is null))
@@ -162,13 +163,13 @@ public class Graph : Node2D
             points.Clear();
         }
 
-        int frames = XSeries.Length;
-
         // Graph has data
-        if (XSeries.Length > 0)
+        if (Series.Length > 0)
         {
-            axisX = new Axis(0, xAxisLen, XSeries);
-            axisY = new Axis(0, yAxisLen, YSeries, true);
+            int lastIndex = Series.Length - 1;
+
+            axisX = new Axis(0, xAxisLen, Series[0].x, Series[lastIndex].x);
+            axisY = new Axis(0, yAxisLen, Series[0].y, Series[lastIndex].y, true);
         }
         // Graph has no data so use default extents
         else
@@ -210,7 +211,9 @@ public class Graph : Node2D
         yMinLabel.Text = String.Format("{0:F2}", axisY.LowerExtent);
         yMaxLabel.Text = String.Format("{0:F2}", axisY.UpperExtent);
 
-        for (int i = 0; i < frames; i++) points.Add(CreatePoint(axisX.Map(XSeries[i]), axisY.Map(YSeries[i])));
+        int numPoints = Series.Length;
+
+        for (int i = 0; i < numPoints; i++) points.Add(CreatePoint(axisX.Map(Series[i].x), axisY.Map(Series[i].y)));
     }
 
     private void SetActivePoint(int i)
@@ -244,15 +247,34 @@ public class Graph : Node2D
         if (!isCrosshairActive) SetActivePoint(-1);
     }
 
-    private int GetSnapIndex(float[] series, float value)
+    // x values are sorted so we can use a binary search
+    private int GetXSnapIndex(float xPosition)
     {
+        float value = axisX.Unmap(xPosition);
+
+        int index = Array.BinarySearch(Series, new Vector2(value, 0), seriesComparer);
+
+        if (index >= 0) return index; // Exact value found
+
+        index = ~index; // Index of first item that is greater than value
+
+        if (index >= Series.Length) return Series.Length - 1; // Value is greater than all items, so return last item
+
+        // Value is between two items so pick the closer item
+        return value - Series[index - 1].x <= Series[index].x - value ? index - 1 : index;
+    }
+
+    // y values are unsorted so we have to run through all of them
+    private int GetYSnapIndex(float yPosition)
+    {
+        float value = axisY.Unmap(yPosition);
         float minDistance = float.PositiveInfinity;
-        int seriesLength = series.Length;
+        int seriesLength = Series.Length;
         int index = 0;
 
         for (int i = 0; i < seriesLength; i++)
         {
-            float dist = series[i] - value;
+            float dist = Series[i].y - value;
 
             if (dist < 0) dist = -dist;
             if (dist < minDistance)
@@ -267,17 +289,52 @@ public class Graph : Node2D
 
     private int GetSnapIndex(Vector2 position)
     {
-        float minDistSq = float.PositiveInfinity;
-        int seriesLength = XSeries.Length;
-        int index = 0;
+        int xIndex = GetXSnapIndex(position.x); // Closest x
+        int index = xIndex;
+        // Distance^2 to point at closest x
+        float radiusSq = position.DistanceSquaredTo(
+                new Vector2(axisX.Map(Series[xIndex].x), axisY.Map(Series[xIndex].y)));
+        float radius = (float)Math.Sqrt(radiusSq);
+        int xRadius = (int)(radius * axisX.InverseUnitLength); // Neighboring x's where closer point could be
+        int xIndexMax = Math.Min(xIndex + xRadius, Series.Length - 1);
+        int xIndexMin = Math.Max(0, xIndex - xRadius);
 
-        for (int i = 0; i < seriesLength; i++)
+        // Search the neighboring x's to the left for a closer point
+        for (int i = xIndex - 1; i >= xIndexMin; i--)
         {
-            float distSq = position.DistanceSquaredTo(new Vector2(axisX.Map(XSeries[i]), axisY.Map(YSeries[i])));
+            float nextRadSq = position.DistanceSquaredTo(new Vector2(axisX.Map(Series[i].x), axisY.Map(Series[i].y)));
 
-            if (distSq < minDistSq)
+            // Closer point found so record it and contract the radius of neighboring x's
+            if (nextRadSq < radiusSq)
             {
-                minDistSq = distSq;
+                radiusSq = nextRadSq;
+
+                float nextXRad = (int)(Math.Sqrt(radiusSq) * axisX.InverseUnitLength);
+
+                if (nextXRad < xRadius)
+                {
+                    xIndexMax = Math.Min(xIndex + xRadius, Series.Length - 1);
+                    xIndexMin = Math.Max(0, xIndex - xRadius);
+                }
+
+                index = i;
+            }
+        }
+
+        // Search the neighboring x's to the right for a closer point
+        for (int i = xIndex + 1; i <= xIndexMax; i++)
+        {
+            float nextRadSq = position.DistanceSquaredTo(new Vector2(axisX.Map(Series[i].x), axisY.Map(Series[i].y)));
+
+            // Closer point found so record it and contract the radius of neighboring x's
+            if (nextRadSq < radiusSq)
+            {
+                radiusSq = nextRadSq;
+
+                float nextXRad = (int)(Math.Sqrt(radiusSq) * axisX.InverseUnitLength);
+
+                if (nextXRad < xRadius) xIndexMax = Math.Min(xIndex + xRadius, Series.Length - 1);
+
                 index = i;
             }
         }
@@ -290,48 +347,27 @@ public class Graph : Node2D
         Vector2 plotPos = position - origin; // translate position relative to window back to plot origin
 
         // Graph has data
-        if (XSeries.Length > 0)
+        if (Series.Length > 0)
         {
             int i;
             float yCrosshairPosX;
             float xCrosshairPosY;
 
             // Graph has more than one point, so get the point from the cursor x position and snap
-            if (XSeries.Length > 1)
+            if (Series.Length > 1)
             {
-                // Only x-snap, so get the closest point along x
-                if (XSnap && !YSnap) i = GetSnapIndex(XSeries, axisX.Unmap(plotPos.x));
-                // Only y-snap, so get the closest point along y
-                else if (!XSnap && YSnap) i = GetSnapIndex(YSeries, axisY.Unmap(plotPos.y));
-                // x and y snap or no snap, so get the closest point along either direction
+                if (XSnap && !YSnap) i = GetXSnapIndex(axisX.Unmap(plotPos.x));
+                else if (!XSnap && YSnap) i = GetYSnapIndex(axisY.Unmap(plotPos.y));
                 else i = GetSnapIndex(plotPos);
-
-                //i = Math.Min(
-                //    Math.Max(Convert.ToInt32((XSeries.Length - 1) * plotPos.x / xAxisLen), 0),
-                //    XSeries.Length - 1);
-                //yCrosshairPosX = XSnap ? i * xAxisLen / (XSeries.Length - 1) : plotPos.x;
-                //xCrosshairPosY = YSnap ? -i * yAxisLen / (YSeries.Length - 1) : cursorPosY;
-                //xCrosshairPosY = YSnap ? axisY.Map(YSeries[i]) - origin.y : plotPos.y;
             }
             // Graph has only one point in the middle of itself
-            else
-            {
-                i = 0;
-                //yCrosshairPosX = XSnap ? xAxisLen / 2 : plotPos.x;
-                //xCrosshairPosY = YSnap ? -yAxisLen / 2 : plotPos.y;
-            }
-
-            yCrosshairPosX = XSnap ? axisX.Map(XSeries[i]) : plotPos.x;
-            xCrosshairPosY = YSnap ? axisY.Map(YSeries[i]) : plotPos.y;
+            else i = 0;
 
             // Set crosshair info text to info about the point, set the crosshair position and active point
             crosshairInfo.Text = String.Format("{0,8}: {1,6}\n{2,8}: {3,6}",
-                    //xAxisLabel, i >= 0 && i < XSeries.Length ? String.Format("{0:F2}", XSeries[i]) : "N/A",
-                    xAxisLabel, String.Format("{0:F2}", XSeries[i]),
-                    //yAxisLabel, i >= 0 && i < YSeries.Length ? String.Format("{0:F2}", YSeries[i]) : "N/A");
-                    yAxisLabel, String.Format("{0:F2}", YSeries[i]));
-            xCrosshair.Position = new Vector2(xCrosshair.Position.x, xCrosshairPosY);
-            yCrosshair.Position = new Vector2(yCrosshairPosX, yCrosshair.Position.y);
+                    xAxisLabel, String.Format("{0:F2}", Series[i].x), yAxisLabel, String.Format("{0:F2}", Series[i].y));
+            xCrosshair.Position = new Vector2(xCrosshair.Position.x, YSnap ? axisY.Map(Series[i].y) : plotPos.y);
+            yCrosshair.Position = new Vector2(XSnap ? axisX.Map(Series[i].x) : plotPos.x, yCrosshair.Position.y);
             SetActivePoint(i);
         }
         // Graph has no data
@@ -380,8 +416,10 @@ public class Graph : Node2D
             //XSnap = !XSnap;
             //YSnap = !YSnap;
             //GD.Print("Toggle snap ", XSnap, YSnap);
-            XSeries = new float[] { -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
-            YSeries = new float[] { 25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25 };
+            float[] xSeries = new float[] { -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
+            float[] ySeries = new float[] { 25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25 };
+            Vector2[] newSeries = new Vector2[xSeries.Length];
+            for (int i = 0; i < xSeries.Length; i++) newSeries[i] = new Vector2(xSeries[i], ySeries[i]);
             Draw();
         }
     }
