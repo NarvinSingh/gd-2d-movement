@@ -17,7 +17,7 @@ Speed = 400.0
 Acceleration = 800.0
 Friction = 1600.0
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera" type="Camera2D" parent="."]
 current = true
 drag_margin_h_enabled = true
 drag_margin_v_enabled = true

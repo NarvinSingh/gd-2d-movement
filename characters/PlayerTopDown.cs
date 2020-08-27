@@ -8,8 +8,8 @@ public class PlayerTopDown : KinematicBody2D
     private const float DEFAULT_ACCEL = 2 * DEFAULT_SPEED;
     private const float DEFAULT_FRIC = 4 * DEFAULT_SPEED;
 
-    private bool isDebug = false;
-    private int debugLevel = 0;
+    private int nMode = 0;
+    private string mode = "Accelerate";
     private float speed;
     private float accel;
     private float fric;
@@ -17,15 +17,9 @@ public class PlayerTopDown : KinematicBody2D
     private float effFric;
     private float intDrag;
     private Label info;
+    private Camera2D camera;
+    private Vector2 origPos;
     private Vector2 v0;
-
-    public Vector2 DbgVelocity
-    {
-        get { return v0; }
-        set { v0 = value; }
-    }
-
-    public float DbgTotalDrag { get { return Drag/* + intDrag*/; } }
 
     [Export]
     public float Speed
@@ -84,141 +78,93 @@ public class PlayerTopDown : KinematicBody2D
         }
     }
 
+    // public Vector2 DbgVelocity
+    // {
+    //     get { return v0; }
+    //     set { v0 = value; }
+    // }
+
+    // public float DbgTotalDrag
+    // {
+    //     get { return Drag + intDrag; }
+    // }
+
+    // public void DbgUpdateInfo()
+    // {
+    //     UpdateInfo();
+    // }
+
     public override void _Ready()
     {
         info = (Label)GetNode("Info");
+        camera = (Camera2D)GetNode("Camera");
+        origPos = Position;
         v0 = Vector2.Zero;
 
         if (Speed <= 0) Speed = DEFAULT_SPEED;
         if (Acceleration <= 0) Acceleration = DEFAULT_ACCEL;
         if (Friction < 0) Friction = DEFAULT_FRIC;
+
+        Drag = 0.01F;
+       
         UpdateInfo();
+    }
+
+    public override void _Input(InputEvent @event)
+    {
+        if (Input.IsActionJustPressed("ui_accept"))
+        {
+            nMode = (nMode + 1) % 3;
+            
+            switch (nMode)
+            {
+                case 1:
+                    mode = "Accelerate2";
+                    break;
+
+                case 2:
+                    mode = "Simple";
+                    break;
+
+                default:
+                    mode = "Accelerate";
+                    break;
+            }
+
+            UpdateInfo();
+        }
+
+        if (Input.IsActionJustPressed("ui_cancel"))
+        {
+            Position = origPos;
+            camera.Align();
+            v0 = Vector2.Zero;
+            UpdateInfo();
+        }
     }
 
     public override void _PhysicsProcess(float dt)
     {
-        // X/Y style
         Vector2 input = GetInputVector();
 
         if (v0 == Vector2.Zero && input == Vector2.Zero) return; // Stopped and no input, so bail
 
-        // DEBUG
-         if (Input.IsActionJustPressed("ui_accept"))
+        switch (mode)
         {
-            GD.Print("Breakpoint 1");
-            // isDebug = !isDebug;
+            case "Accelerate2":
+                v0 = new Vector2(Accelerate2(v0.x, input.x, dt), Accelerate2(v0.y, input.y, dt)).Clamped(Speed);
+                break;
+
+            case "Simple":
+                v0 = SimpleAccelerate(v0, input, dt);
+                break;
+
+            default:
+                v0 = new Vector2(Accelerate(v0.x, input.x, dt), Accelerate(v0.y, input.y, dt)).Clamped(Speed);
+                break;
         }
 
-        if (input.y != 0)
-        {
-            if (debugLevel == 0) 
-            {
-                // GD.Print("Breakpoint 2");
-                debugLevel = 1;
-            }
-        }
-
-        if (input.y == 0)
-        {
-            if (debugLevel == 1) 
-            {
-                // GD.Print("Breakpoint 3");
-                debugLevel = 2;
-            }
-        }
-
-        v0 = new Vector2(Accelerate(v0.x, input.x, dt), Accelerate(v0.y, input.y, dt)).Clamped(Speed);
-
-        // // Parallel/Orthogonal style
-        // Vector2 input = GetInputVector();
-        // Vector2 inputPara;
-        // Vector2 inputOrth;
-        // Vector2 vHat;
-        // Vector2 v;
-        // float s0;
-
-        // if (v0 == Vector2.Zero && input == Vector2.Zero) return; // Stopped and no input, so bail
-
-        // // DEBUG
-        //  if (Input.IsActionJustPressed("ui_accept"))
-        // {
-        //     GD.Print("Breakpoint 1");
-        //     // isDebug = !isDebug;
-        // }
-
-        // if (input.y != 0)
-        // {
-        //     if (debugLevel == 0) 
-        //     {
-        //         // GD.Print("Breakpoint 2");
-        //         debugLevel = 1;
-        //     }
-        // }
-
-        // if (input.y == 0)
-        // {
-        //     if (debugLevel == 1) 
-        //     {
-        //         // GD.Print("Breakpoint 3");
-        //         debugLevel = 2;
-        //     }
-        // }
-
-        // if (v0 != Vector2.Zero)
-        // {
-        //     vHat = v0.Normalized();
-        //     inputPara = input.Project(v0);
-        //     inputOrth = input.Project(v0.Tangent());
-        // }
-        // else
-        // {
-        //     vHat = input.Normalized();
-        //     inputPara = input;
-        //     inputOrth = Vector2.Zero;
-        // }
-
-        // s0 = v0.Length();
-
-        // float angleToV0 = inputPara.AngleTo(v0);
-        // bool isPara = Math.Round(inputPara.AngleTo(v0)) == 0;
-
-        // // Accelerating
-        // if (inputPara != Vector2.Zero && (isPara || v0 == Vector2.Zero))
-        // {
-        //     // v = (float)Velocity(dt, s0, Acceleration * inputPara.Length(), Drag + intDrag) * vHat;
-        //     v = (float)Velocity(dt, s0, Acceleration * inputPara.Length(), Drag) * vHat;
-        // }
-        // // Decelerating (either due to friction or accelerating in the other direction)
-        // else if (Friction != 0 || inputPara != Vector2.Zero)
-        // {
-        //     float timeToStop = (float)TimeToStop(s0, -effFric, Drag);
-
-        //     // Not enough time to stop, so apply friction and drag for dt
-        //     if (timeToStop > dt) v = (float)Velocity(dt, s0, -effFric, Drag) * vHat;
-        //     // Enough time to stop, so apply acceleration and drag in reverse dirction for remaining time
-        //     // else v = -(float)Velocity(dt - timeToStop, 0, Acceleration * inputPara.Length(), Drag + intDrag) * vHat;
-        //     else v = -(float)Velocity(dt - timeToStop, 0, Acceleration * inputPara.Length(), Drag) * vHat;
-        // }
-        // // Coasting (no friction)
-        // else v = v0;
-
-        // // Changing direction
-        // if (inputOrth != Vector2.Zero)
-        // {
-        //     // v += (float)Velocity(dt, 0, Acceleration * inputOrth.Length(), Drag + intDrag) * inputOrth.Normalized();
-        //     v += (float)Velocity(dt, 0, Acceleration * inputOrth.Length(), Drag) * inputOrth.Normalized();
-        // }
-
-        // v0 = v.Clamped(Speed);
-        // Vector2 unclampedV0 = v;
-        // v0 = v.Clamped(Speed);
-        // if (isDebug) GD.Print(String.Format("{0},{1},{2},{3},{4},{5}", unclampedV0.x, unclampedV0.y, unclampedV0.Length(), v0.x, v0.y, v0.Length()));
         MoveAndCollide(v0 * dt);
-        UpdateInfo();
-    }
-
-    public void DbgUpdateInfo()
-    {
         UpdateInfo();
     }
 
@@ -244,6 +190,37 @@ public class PlayerTopDown : KinematicBody2D
         return v0;
     }
 
+    private float Accelerate2(float v0, float input, float dt)
+    {
+        // Accelerating
+        if (input > 0 && v0 >= 0 || input < 0 && v0 <= 0)
+        {
+            return (float)Velocity(dt, v0, Acceleration * input, Drag + intDrag);
+        }
+
+        // Decelerating (either due to friction or accelerating in the other direction)
+        else if (Friction != 0 || input != 0)
+        {
+            float friction = v0 >= 0 ? -effFric : effFric;
+            float timeToStop = (float)TimeToStop(v0, friction, Drag);
+
+            // Not enough time to stop, so apply friction and drag for dt
+            if (timeToStop > dt) return (float)Velocity(dt, v0, friction, Drag);
+
+            // Enough time to stop, so apply acceleration and drag for remaining time
+            return (float)Velocity(dt - timeToStop, 0, Acceleration * input, Drag + intDrag);
+        }
+
+        // Coasting (no friction)
+        return v0;
+    }
+
+    private Vector2 SimpleAccelerate(Vector2 v0, Vector2 input, float dt)
+    {
+        if (input != Vector2.Zero) return (v0 + input * Acceleration * dt).Clamped(Speed);
+        return v0.MoveToward(Vector2.Zero, Friction * dt);
+    }
+
     private void UpdateEffectiveFriction()
     {
         effFric = Friction != 0 ? Friction : Acceleration;
@@ -266,7 +243,7 @@ public class PlayerTopDown : KinematicBody2D
     private void UpdateInfo()
     {
         info.Text = String.Format("position: {0,8:F2}, {1,8:F2}\nvelocity: {2,8:F2}, {3,8:F2}\n   speed: {4,8:F2}\n" +
-                "a={5}, f={6}, d={7}+{8}",
-                Position.x, Position.y, v0.x, v0.y, v0.Length(), Acceleration, Friction, Drag, intDrag);
+                "a={5}, f={6}, d={7}+{8}\nmode: {9}",
+                Position.x, Position.y, v0.x, v0.y, v0.Length(), Acceleration, Friction, Drag, intDrag, mode);
     }
 }
