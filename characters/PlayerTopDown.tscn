@@ -13,6 +13,9 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_group_": true
 }
+Speed = 400.0
+Acceleration = 800.0
+Friction = 1600.0
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true

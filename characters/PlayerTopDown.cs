@@ -1,72 +1,261 @@
 using Godot;
 using System;
-using System.Numerics;
-using Vector2 = Godot.Vector2;
+using static Com.NarvinSingh.Physics.Kinematics;
 
 public class PlayerTopDown : KinematicBody2D
 {
-    private const float DT = 1.0F / 10000;
-    private const float DT_TOLERANCE = DT * 2;
+    private const float DEFAULT_SPEED = 400.0F;
+    private const float DEFAULT_ACCEL = 2 * DEFAULT_SPEED;
+    private const float DEFAULT_FRIC = 4 * DEFAULT_SPEED;
 
+    private bool isDebug = false;
+    private int debugLevel = 0;
+    private float speed;
+    private float accel;
+    private float fric;
+    private float drag;
+    private float effFric;
+    private float intDrag;
     private Label info;
-    private float frictionCoeff;
-    private float dragCoeff;
-    private Vector2 velocity = Vector2.Zero;
+    private Vector2 v0;
 
-    [Export] public float Mass { get; set; } = 10;
-    [Export] public float Speed { get; set; } = 200;
-    [Export] public float Acceleration { get; set; } = 400;
-
-    private float InternalDragCoeff
+    public Vector2 DbgVelocity
     {
-        get
+        get { return v0; }
+        set { v0 = value; }
+    }
+
+    public float DbgTotalDrag { get { return Drag/* + intDrag*/; } }
+
+    [Export]
+    public float Speed
+    {
+        get { return speed; }
+        set
         {
-            return Acceleration / Speed / Speed;
+            if (value <= 0) throw new ArgumentOutOfRangeException("Speed", "Speed must be greater than zero.");
+
+            speed = value;
+            UpdateInternalDrag();
+        }
+    }
+
+    [Export]
+    public float Acceleration
+    {
+        get { return accel; }
+        set
+        {
+            if (value <= 0)
+            {
+                throw new ArgumentOutOfRangeException("Acceleration", "Acceleration must be greater than zero.");
+            }
+
+            accel = value;
+            UpdateEffectiveFriction();
+            UpdateInternalDrag();
+        }
+    }
+
+    [Export]
+    public float Friction
+    {
+        get { return fric; }
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException("Friction", "Friction must be greater than or equal to zero.");
+            }
+
+            fric = value;
+            UpdateEffectiveFriction();
+        }
+    }
+
+    [Export]
+    public float Drag
+    {
+        get { return drag; }
+        set
+        {
+            if (value < 0) throw new ArgumentOutOfRangeException("Drag", "Drag must be greater than or equal to zero.");
+            drag = value;
         }
     }
 
     public override void _Ready()
     {
-        TopDown level = (TopDown)GetParent();
         info = (Label)GetNode("Info");
-        frictionCoeff = level.FrictionCoeff;
-        dragCoeff = level.DragCoeff;
-        GD.Print("PlayerTopDown ready");
+        v0 = Vector2.Zero;
 
-        Vector2 velocityExact = new Vector2(200, 0);
-
-        for (int i = 1; i <= 0; i++)
-        {
-            ulong t0;
-            ulong t;
-            const float DT = 1.0F / 60;
-
-            // t0 = OS.GetTicksUsec();
-            // velocity = CalcVelocity(DT, velocity, Vector2.Right, Speed, Acceleration, frictionCoeff, dragCoeff);
-            // t = OS.GetTicksUsec();
-            // GD.Print(String.Format("{0,4} ({1,6:F2}, {2,6:F2}) {3,6:F2} {4,4}us", i, velocity.x, velocity.y, velocity.Length(), t - t0));
-
-            t0 = OS.GetTicksUsec();
-            velocityExact = CalcVelocityExact(DT, velocityExact, Vector2.Zero, 200, 400, 800, 400.0F / 200 / 200);
-            t = OS.GetTicksUsec();
-            // GD.Print(String.Format("{0,4} ({1,6:F2}, {2,6:F2}) {3,6:F2} {4,4}us delta: {5:F2}\n", i, velocityExact.x, velocityExact.y, velocityExact.Length(), t - t0, velocity.Length() - velocityExact.Length()));
-            GD.Print(String.Format("{0},{1}", i * DT, velocityExact.x));
-        }
-
-        velocity = Vector2.Zero;
-        // GD.Print("KinematicsTest.ItAcceleratesNoDrag()", KinematicsTest.ItAcceleratesNoDrag());
-        // GD.Print("KinematicsTest.ItDragsNoAcceleration()", KinematicsTest.ItDragsNoAcceleration());
+        if (Speed <= 0) Speed = DEFAULT_SPEED;
+        if (Acceleration <= 0) Acceleration = DEFAULT_ACCEL;
+        if (Friction < 0) Friction = DEFAULT_FRIC;
+        UpdateInfo();
     }
 
     public override void _PhysicsProcess(float dt)
     {
-        velocity = CalcVelocity(dt, velocity);
-        MoveAndCollide(velocity * dt);
-        info.Text = String.Format("position: {0,8:F2}, {1,8:F2}\nvelocity: {2,8:F2}, {3,8:F2}\n   speed: {4,8:F2}",
-                Position.x, Position.y, velocity.x, velocity.y, velocity.Length());
+        // X/Y style
+        Vector2 input = GetInputVector();
+
+        if (v0 == Vector2.Zero && input == Vector2.Zero) return; // Stopped and no input, so bail
+
+        // DEBUG
+         if (Input.IsActionJustPressed("ui_accept"))
+        {
+            GD.Print("Breakpoint 1");
+            // isDebug = !isDebug;
+        }
+
+        if (input.y != 0)
+        {
+            if (debugLevel == 0) 
+            {
+                // GD.Print("Breakpoint 2");
+                debugLevel = 1;
+            }
+        }
+
+        if (input.y == 0)
+        {
+            if (debugLevel == 1) 
+            {
+                // GD.Print("Breakpoint 3");
+                debugLevel = 2;
+            }
+        }
+
+        v0 = new Vector2(Accelerate(v0.x, input.x, dt), Accelerate(v0.y, input.y, dt)).Clamped(Speed);
+
+        // // Parallel/Orthogonal style
+        // Vector2 input = GetInputVector();
+        // Vector2 inputPara;
+        // Vector2 inputOrth;
+        // Vector2 vHat;
+        // Vector2 v;
+        // float s0;
+
+        // if (v0 == Vector2.Zero && input == Vector2.Zero) return; // Stopped and no input, so bail
+
+        // // DEBUG
+        //  if (Input.IsActionJustPressed("ui_accept"))
+        // {
+        //     GD.Print("Breakpoint 1");
+        //     // isDebug = !isDebug;
+        // }
+
+        // if (input.y != 0)
+        // {
+        //     if (debugLevel == 0) 
+        //     {
+        //         // GD.Print("Breakpoint 2");
+        //         debugLevel = 1;
+        //     }
+        // }
+
+        // if (input.y == 0)
+        // {
+        //     if (debugLevel == 1) 
+        //     {
+        //         // GD.Print("Breakpoint 3");
+        //         debugLevel = 2;
+        //     }
+        // }
+
+        // if (v0 != Vector2.Zero)
+        // {
+        //     vHat = v0.Normalized();
+        //     inputPara = input.Project(v0);
+        //     inputOrth = input.Project(v0.Tangent());
+        // }
+        // else
+        // {
+        //     vHat = input.Normalized();
+        //     inputPara = input;
+        //     inputOrth = Vector2.Zero;
+        // }
+
+        // s0 = v0.Length();
+
+        // float angleToV0 = inputPara.AngleTo(v0);
+        // bool isPara = Math.Round(inputPara.AngleTo(v0)) == 0;
+
+        // // Accelerating
+        // if (inputPara != Vector2.Zero && (isPara || v0 == Vector2.Zero))
+        // {
+        //     // v = (float)Velocity(dt, s0, Acceleration * inputPara.Length(), Drag + intDrag) * vHat;
+        //     v = (float)Velocity(dt, s0, Acceleration * inputPara.Length(), Drag) * vHat;
+        // }
+        // // Decelerating (either due to friction or accelerating in the other direction)
+        // else if (Friction != 0 || inputPara != Vector2.Zero)
+        // {
+        //     float timeToStop = (float)TimeToStop(s0, -effFric, Drag);
+
+        //     // Not enough time to stop, so apply friction and drag for dt
+        //     if (timeToStop > dt) v = (float)Velocity(dt, s0, -effFric, Drag) * vHat;
+        //     // Enough time to stop, so apply acceleration and drag in reverse dirction for remaining time
+        //     // else v = -(float)Velocity(dt - timeToStop, 0, Acceleration * inputPara.Length(), Drag + intDrag) * vHat;
+        //     else v = -(float)Velocity(dt - timeToStop, 0, Acceleration * inputPara.Length(), Drag) * vHat;
+        // }
+        // // Coasting (no friction)
+        // else v = v0;
+
+        // // Changing direction
+        // if (inputOrth != Vector2.Zero)
+        // {
+        //     // v += (float)Velocity(dt, 0, Acceleration * inputOrth.Length(), Drag + intDrag) * inputOrth.Normalized();
+        //     v += (float)Velocity(dt, 0, Acceleration * inputOrth.Length(), Drag) * inputOrth.Normalized();
+        // }
+
+        // v0 = v.Clamped(Speed);
+        // Vector2 unclampedV0 = v;
+        // v0 = v.Clamped(Speed);
+        // if (isDebug) GD.Print(String.Format("{0},{1},{2},{3},{4},{5}", unclampedV0.x, unclampedV0.y, unclampedV0.Length(), v0.x, v0.y, v0.Length()));
+        MoveAndCollide(v0 * dt);
+        UpdateInfo();
     }
 
-    protected Vector2 GetInputVector()
+    public void DbgUpdateInfo()
+    {
+        UpdateInfo();
+    }
+
+    private float Accelerate(float v0, float input, float dt)
+    {
+        // Accelerating
+        if (input > 0 && v0 >= 0 || input < 0 && v0 <= 0) return (float)Velocity(dt, v0, Acceleration * input, Drag);
+
+        // Decelerating (either due to friction or accelerating in the other direction)
+        else if (Friction != 0 || input != 0)
+        {
+            float friction = v0 >= 0 ? -effFric : effFric;
+            float timeToStop = (float)TimeToStop(v0, friction, Drag);
+
+            // Not enough time to stop, so apply friction and drag for dt
+            if (timeToStop > dt) return (float)Velocity(dt, v0, friction, Drag);
+
+            // Enough time to stop, so apply acceleration and drag for remaining time
+            return (float)Velocity(dt - timeToStop, 0, Acceleration * input, Drag);
+        }
+
+        // Coasting (no friction)
+        return v0;
+    }
+
+    private void UpdateEffectiveFriction()
+    {
+        effFric = Friction != 0 ? Friction : Acceleration;
+    }
+
+    private void UpdateInternalDrag()
+    {
+        // Top speed is modeled as terminal velocity (vt) under an internal drag force: 0 = a - d * vt^2
+        intDrag = Acceleration / (Speed * Speed);
+    }
+
+    private Vector2 GetInputVector()
     {
         return new Vector2(
             Input.GetActionStrength("ui_right") - Input.GetActionStrength("ui_left"),
@@ -74,127 +263,10 @@ public class PlayerTopDown : KinematicBody2D
         ).Clamped(1);
     }
 
-    protected Vector2 CalcVelocityExact(float dt, Vector2 v0, Vector2 i, float sMax, float a,
-            float f, float d)
+    private void UpdateInfo()
     {
-        Vector2 vHat;
-        Vector2 iPara;
-        Vector2 iOrth;
-        Vector2 v;
-        float s0 = v0.Length();
-
-        if (v0 != Vector2.Zero)
-        {
-            vHat = v0.Normalized();
-            iPara = i.Project(v0);
-            iOrth = i.Project(v0.Tangent());
-        }
-        else
-        {
-            vHat = i.Normalized();
-            iPara = i;
-            iOrth = Vector2.Zero;
-        }
-
-        if (iPara != Vector2.Zero && iPara.AngleTo(v0) == 0) v = CalcSpeed(s0, dt, d, a * iPara.Length()) * vHat;
-        else
-        {
-            float tStop = CalcStopTime(s0, d, f);
-
-            if (tStop > dt) v = CalcSpeed(s0, dt, d, f) * vHat;
-            else v = -CalcSpeed(0, dt - tStop, d, a * iPara.Length()) * vHat;
-        }
-
-        v += CalcSpeed(0, dt, d, a * iOrth.Length()) * iOrth.Normalized();
-
-        return v;
-    }
-
-    protected Vector2 CalcVelocityExact(float dt, Vector2 v0)
-    {
-        return CalcVelocityExact(dt, v0, GetInputVector(), Speed, Acceleration, frictionCoeff, dragCoeff);
-    }
-
-    protected Vector2 CalcVelocity(float dt, Vector2 v0, Vector2 i, float sMax, float a,
-            float f, float d)
-    {
-        if (d != 0 && dt > DT_TOLERANCE)
-        {
-            return CalcVelocity(dt - DT, CalcVelocity(DT, v0, i, sMax, a, f, d), i, sMax, a, f, d);
-        }
-
-        Vector2 vHat;
-        Vector2 iPara;
-        Vector2 iOrth;
-        Vector2 v;
-        float s0 = v0.Length();
-
-        if (v0 != Vector2.Zero)
-        {
-            vHat = v0.Normalized();
-            iPara = i.Project(v0);
-            iOrth = i.Project(v0.Tangent());
-        }
-        else
-        {
-            vHat = i.Normalized();
-            iPara = i;
-            iOrth = Vector2.Zero;
-        }
-
-        if (iPara != Vector2.Zero && iPara.AngleTo(v0) == 0)
-        {
-            v = v0 + (a * iPara - d * s0 * s0 * vHat) * dt;
-        }
-        else
-        {
-            float sMed = s0 / 2;
-            float tFriction = s0 / (f + d * sMed * sMed);
-
-            if (tFriction > dt)
-            {
-                v = v0 - (f * d * s0 * s0) * vHat * dt;
-            }
-            else
-            {
-                v = a * iPara * (dt - tFriction);
-            }
-        }
-
-        v += a * iOrth * dt;
-
-        return v;
-    }
-
-    protected Vector2 CalcVelocity(float dt, Vector2 v0)
-    {
-        return CalcVelocity(dt, v0, GetInputVector(), Speed, Acceleration, frictionCoeff, dragCoeff);
-    }
-
-    private float CalcSpeed(float s0, float dt, float d = 0, float a = 0)
-    {
-        if (d == 0) return s0 + a * dt;
-
-        if (a > 0)
-        {
-            Complex c1 = new Complex(0, Math.Sqrt(a / d));
-            Complex c2 = new Complex(0, Math.Sqrt(d / a));
-            Complex c3 = new Complex(0, Math.Sqrt(a * d));
-            Complex s = -c1 * Complex.Tan(Complex.Atan(c2 * s0) + c3 * dt);
-            return (float)s.Real;
-        }
-
-        if (a < 0) return Mathf.Sqrt(a / d) * Mathf.Tan(Mathf.Atan(Mathf.Sqrt(d / a) * s0) + Mathf.Sqrt(a * d) * dt);
-
-        return s0 / (d * s0 * dt + 1);
-    }
-
-    private float CalcStopTime(float s0, float d = 0, float f = 0)
-    {
-        if (f <= 0) return float.PositiveInfinity;
-
-        if (d == 0) return s0 / f;
-
-        return Mathf.Atan(Mathf.Sqrt(f / d) * s0) / Mathf.Sqrt(f * d);
+        info.Text = String.Format("position: {0,8:F2}, {1,8:F2}\nvelocity: {2,8:F2}, {3,8:F2}\n   speed: {4,8:F2}\n" +
+                "a={5}, f={6}, d={7}+{8}",
+                Position.x, Position.y, v0.x, v0.y, v0.Length(), Acceleration, Friction, Drag, intDrag);
     }
 }
