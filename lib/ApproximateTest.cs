@@ -2,7 +2,7 @@
 using static Com.NarvinSingh.Test.Approximate;
 using static System.Math;
 
-namespace Com.NarvinSingh.Test
+namespace Com.NarvinSingh.UnitTest
 {
     public static class ApproximateTest
     {

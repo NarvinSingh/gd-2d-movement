@@ -3,7 +3,7 @@ using System;
 using static Com.NarvinSingh.Graphing.Axis;
 using static System.Math;
 
-namespace Com.NarvinSingh.Test
+namespace Com.NarvinSingh.UnitTest
 {
     public static class AxisTest
     {

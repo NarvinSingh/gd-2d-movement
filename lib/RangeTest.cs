@@ -1,7 +1,7 @@
 ﻿using Com.NarvinSingh.Graphing;
 using System;
 
-namespace Com.NarvinSingh.Test
+namespace Com.NarvinSingh.UnitTest
 {
     public static class RangeTest
     {

@@ -2,7 +2,7 @@
 using static Com.NarvinSingh.Physics.Kinematics;
 using static Com.NarvinSingh.Test.Approximate;
 
-namespace Test
+namespace Com.NarvinSingh.UnitTest
 {
     public static class KinematicsTest
     {
