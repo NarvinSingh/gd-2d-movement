@@ -22,16 +22,16 @@ namespace Com.NarvinSingh.UnitTest
 
             Set("staticField", testClass, "new value 1");
             if ((string)Get("staticField", testClass) != "new value 1") return false;
-            
+
             Set("field", testClass, "new value 2");
             if ((string)Get("field", testClass) != "new value 2") return false;
-            
+
             Set("StaticProp", testClass, "new value 3");
             if ((string)Get("StaticProp", testClass) != "new value 3") return false;
-            
+
             Set("Prop", testClass, "new value 4");
             if ((string)Get("Prop", testClass) != "new value 4") return false;
-            
+
             return true;
         }
 
@@ -49,7 +49,7 @@ namespace Com.NarvinSingh.UnitTest
         private class TestClass
         {
             private const string constField = "private const field";
-            
+
             private static readonly string staticField = "private static field";
 
             private readonly string field = "private field";
@@ -63,11 +63,11 @@ namespace Com.NarvinSingh.UnitTest
                     Meth("");
                 }
             }
-            
+
             private static string StaticProp { get; set; } = "private static property";
 
             private string Prop { get; set; } = "private property";
-            
+
             private static string StaticMeth()
             {
                 return "private static method";
