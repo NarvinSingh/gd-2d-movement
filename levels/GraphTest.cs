@@ -1,34 +1,14 @@
 using Com.NarvinSingh.Physics;
-using Com.NarvinSingh.Test;
 using Godot;
 using System;
 
-public class KinematicsTest : Node2D
+public class GraphTest : Node2D
 {
     private Carousel carousel;
     private PackedScene graphScene;
 
     public override void _Ready()
     {
-        // lib class tests
-        GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
-        GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
-        GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));
-
-        GD.Print(Summarize("KinematicsTest.ItCalculatesTimeToStop", Test.KinematicsTest.ItCalculatesTimeToStop()));
-        GD.Print(Summarize("KinematicsTest.ItCalculatesVelocity", Test.KinematicsTest.ItCalculatesVelocity()));
-        GD.Print(Summarize(
-                "KinematicsTest.ItCalculatesTerminalVelocity", Test.KinematicsTest.ItCalculatesTerminalVelocity()));
-
-        GD.Print(Summarize("RangeTest.ItInstantiates", RangeTest.ItInstantiates()));
-        GD.Print(Summarize("RangeTest.ItIncludes", RangeTest.ItIncludes()));
-
-        GD.Print(Summarize("AxisTest.ItCalcsExtents", AxisTest.ItCalcsExtents()));
-        GD.Print(Summarize("AxisTest.ItInstantiates", AxisTest.ItInstantiates()));
-        GD.Print(Summarize("AxisTest.ItMaps", AxisTest.ItMaps()));
-        GD.Print(Summarize("AxisTest.ItUnmaps", AxisTest.ItUnmaps()));
-
-        // Graph tests
         carousel = (Carousel)GetNode("Carousel");
         graphScene = (PackedScene)ResourceLoader.Load("res://nodes/Graph.tscn");
 
@@ -70,25 +50,6 @@ public class KinematicsTest : Node2D
         carousel.AddNode(CreateGraph(GenerateVelocityData(-15, 10), "23) v0 = -15, a = 10"));
         carousel.AddNode(CreateGraph(GenerateVelocityData(-15, -10), "24) v0 = -15, a = -10"));
         carousel.SetActiveNode(0);
-
-        //GD.Print("Goodbye");
-        //GetTree().Quit();
-    }
-
-    private string Summarize(string description, bool isPass)
-    {
-        if (isPass) return String.Format("Pass {0}", description);
-        return String.Format("FAIL {0}", description);
-    }
-
-    private string Summarize(string description, double actual, double expected, int precision = 10)
-    {
-        if (Math.Round(actual, precision) == Math.Round(expected, precision))
-        {
-            return String.Format("Pass {0}: {1}", description, actual);
-        }
-
-        return String.Format("FAIL {0}: actual = {1}, expected = {2}", description, actual, expected);
     }
 
     private float[][] GenerateVelocityData(
