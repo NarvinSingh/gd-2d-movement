@@ -7,6 +7,7 @@ public class PlayerTopDown : KinematicBody2D
     private const float DEFAULT_SPEED = 400.0F;
     private const float DEFAULT_ACCEL = 2 * DEFAULT_SPEED;
     private const float DEFAULT_FRIC = 4 * DEFAULT_SPEED;
+    private const float ROTATION_OFFSET = (float)(Math.PI / 2.0);
 
     private int nMode = 0;
     private string mode = "Accelerate";
@@ -18,6 +19,7 @@ public class PlayerTopDown : KinematicBody2D
     private float intDrag;
     private Label info;
     private Camera2D camera;
+    private Sprite sprite;
     private Vector2 origPos;
     private Vector2 v0;
 
@@ -78,26 +80,11 @@ public class PlayerTopDown : KinematicBody2D
         }
     }
 
-    // public Vector2 DbgVelocity
-    // {
-    //     get { return v0; }
-    //     set { v0 = value; }
-    // }
-
-    // public float DbgTotalDrag
-    // {
-    //     get { return Drag + intDrag; }
-    // }
-
-    // public void DbgUpdateInfo()
-    // {
-    //     UpdateInfo();
-    // }
-
     public override void _Ready()
     {
         info = (Label)GetNode("Info");
         camera = (Camera2D)GetNode("Camera");
+        sprite = (Sprite)GetNode("Sprite");
         origPos = Position;
         v0 = Vector2.Zero;
 
@@ -105,6 +92,7 @@ public class PlayerTopDown : KinematicBody2D
         if (Acceleration <= 0) Acceleration = DEFAULT_ACCEL;
         if (Friction < 0) Friction = DEFAULT_FRIC;
 
+        Friction = 400;
         Drag = 0.01F;
        
         UpdateInfo();
@@ -123,7 +111,7 @@ public class PlayerTopDown : KinematicBody2D
                     break;
 
                 case 2:
-                    mode = "Simple";
+                    mode = "Accelerate3";
                     break;
 
                 default:
@@ -149,14 +137,14 @@ public class PlayerTopDown : KinematicBody2D
 
         if (v0 == Vector2.Zero && input == Vector2.Zero) return; // Stopped and no input, so bail
 
-        switch (mode)
+        switch (nMode)
         {
-            case "Accelerate2":
+            case 1:
                 v0 = new Vector2(Accelerate2(v0.x, input.x, dt), Accelerate2(v0.y, input.y, dt)).Clamped(Speed);
                 break;
 
-            case "Simple":
-                v0 = SimpleAccelerate(v0, input, dt);
+            case 2:
+                v0 = Accelerate3(v0, input, dt);
                 break;
 
             default:
@@ -164,58 +152,62 @@ public class PlayerTopDown : KinematicBody2D
                 break;
         }
 
+        if (v0 != Vector2.Zero) sprite.Rotation = v0.Angle() + ROTATION_OFFSET;
         MoveAndCollide(v0 * dt);
         UpdateInfo();
     }
 
-    private float Accelerate(float v0, float input, float dt)
+    // Calculate speed using both external and internal drag to model top speed
+    private float Accelerate(float s0, float input, float dt)
     {
         // Accelerating
-        if (input > 0 && v0 >= 0 || input < 0 && v0 <= 0) return (float)Velocity(dt, v0, Acceleration * input, Drag);
-
-        // Decelerating (either due to friction or accelerating in the other direction)
-        else if (Friction != 0 || input != 0)
+        if (input > 0 && s0 >= 0 || input < 0 && s0 <= 0)
         {
-            float friction = v0 >= 0 ? -effFric : effFric;
-            float timeToStop = (float)TimeToStop(v0, friction, Drag);
-
-            // Not enough time to stop, so apply friction and drag for dt
-            if (timeToStop > dt) return (float)Velocity(dt, v0, friction, Drag);
-
-            // Enough time to stop, so apply acceleration and drag for remaining time
-            return (float)Velocity(dt - timeToStop, 0, Acceleration * input, Drag);
-        }
-
-        // Coasting (no friction)
-        return v0;
-    }
-
-    private float Accelerate2(float v0, float input, float dt)
-    {
-        // Accelerating
-        if (input > 0 && v0 >= 0 || input < 0 && v0 <= 0)
-        {
-            return (float)Velocity(dt, v0, Acceleration * input, Drag + intDrag);
+            return (float)Velocity(dt, s0, Acceleration * input, Drag + intDrag);
         }
 
         // Decelerating (either due to friction or accelerating in the other direction)
         else if (Friction != 0 || input != 0)
         {
-            float friction = v0 >= 0 ? -effFric : effFric;
-            float timeToStop = (float)TimeToStop(v0, friction, Drag);
+            float friction = s0 >= 0 ? -effFric : effFric;
+            float timeToStop = (float)TimeToStop(s0, friction, Drag);
 
             // Not enough time to stop, so apply friction and drag for dt
-            if (timeToStop > dt) return (float)Velocity(dt, v0, friction, Drag);
+            if (timeToStop > dt) return (float)Velocity(dt, s0, friction, Drag);
 
             // Enough time to stop, so apply acceleration and drag for remaining time
             return (float)Velocity(dt - timeToStop, 0, Acceleration * input, Drag + intDrag);
         }
 
         // Coasting (no friction)
-        return v0;
+        return s0;
     }
 
-    private Vector2 SimpleAccelerate(Vector2 v0, Vector2 input, float dt)
+    // Calculate speed using only external drag to model top speed
+    private float Accelerate2(float s0, float input, float dt)
+    {
+        // Accelerating
+        if (input > 0 && s0 >= 0 || input < 0 && s0 <= 0) return (float)Velocity(dt, s0, Acceleration * input, Drag);
+
+        // Decelerating (either due to friction or accelerating in the other direction)
+        else if (Friction != 0 || input != 0)
+        {
+            float friction = s0 >= 0 ? -effFric : effFric;
+            float timeToStop = (float)TimeToStop(s0, friction, Drag);
+
+            // Not enough time to stop, so apply friction and drag for dt
+            if (timeToStop > dt) return (float)Velocity(dt, s0, friction, Drag);
+
+            // Enough time to stop, so apply acceleration and drag for remaining time
+            return (float)Velocity(dt - timeToStop, 0, Acceleration * input, Drag);
+        }
+
+        // Coasting (no friction)
+        return s0;
+    }
+
+    // Calculate velocity with no drag and clamped to top speed
+    private Vector2 Accelerate3(Vector2 v0, Vector2 input, float dt)
     {
         if (input != Vector2.Zero) return (v0 + input * Acceleration * dt).Clamped(Speed);
         return v0.MoveToward(Vector2.Zero, Friction * dt);

@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://assets/godot_icon.png" type="Texture" id=1]
+[ext_resource path="res://assets/blue_ship_1.png" type="Texture" id=1]
 [ext_resource path="res://characters/PlayerTopDown.cs" type="Script" id=2]
 [ext_resource path="res://resources/InfoFont.tres" type="DynamicFont" id=3]
 [ext_resource path="res://resources/InfoStyleBox.tres" type="StyleBox" id=4]
@@ -26,12 +26,13 @@ drag_margin_v_enabled = true
 texture = ExtResource( 1 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
 shape = SubResource( 1 )
 
 [node name="Info" type="Label" parent="."]
 margin_left = -147.0
-margin_top = 60.0
+margin_top = 68.0
+margin_right = 145.0
+margin_bottom = 87.0
 custom_styles/normal = ExtResource( 4 )
 custom_fonts/font = ExtResource( 3 )
 custom_colors/font_color = Color( 0.74902, 0.247059, 0, 1 )
