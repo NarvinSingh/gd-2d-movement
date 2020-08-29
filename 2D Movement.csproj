@@ -63,9 +63,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="characters\PlayerTopDownTest.cs" />
     <Compile Include="levels\GraphTest.cs" />
     <Compile Include="levels\LibTest.cs" />
+    <Compile Include="levels\PlayerTopDownTest.cs" />
     <Compile Include="lib\PrivateAccess.cs" />
     <Compile Include="lib\ApproximateTest.cs" />
     <Compile Include="lib\Axis.cs" />
@@ -80,7 +80,7 @@
     <Compile Include="lib\Kinematics.cs" />
     <Compile Include="nodes\PolygonOutline2D.cs" />
     <Compile Include="characters\PlayerTopDown.cs" />
-    <Compile Include="levels\TopDownTest.cs" />
+    <Compile Include="levels\TopDown.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

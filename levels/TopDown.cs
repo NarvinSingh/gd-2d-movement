@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using static Com.NarvinSingh.Physics.Kinematics;
 
-public class TopDownTest : Node2D
+public class TopDown : Node2D
 {
     private const float FPS = 60;
     private const float DT = 1.0F / FPS;
