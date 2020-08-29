@@ -9,8 +9,6 @@ public class PlayerTopDown : KinematicBody2D
     private const float DEFAULT_FRIC = 4 * DEFAULT_SPEED;
     private const float ROTATION_OFFSET = (float)(Math.PI / 2.0);
 
-    private int nMode = 0;
-    private string mode = "Accelerate";
     private float speed;
     private float accel;
     private float fric;
@@ -22,6 +20,10 @@ public class PlayerTopDown : KinematicBody2D
     private Sprite sprite;
     private Vector2 origPos;
     private Vector2 v0;
+
+    public enum AccelMode { IntExtDrag, ExtDrag, NoDrag }
+
+    [Export] public AccelMode AccelerationMode { get; set; } = AccelMode.IntExtDrag;
 
     [Export]
     public float Speed
@@ -94,7 +96,7 @@ public class PlayerTopDown : KinematicBody2D
 
         Friction = 400;
         Drag = 0.01F;
-       
+
         UpdateInfo();
     }
 
@@ -102,23 +104,7 @@ public class PlayerTopDown : KinematicBody2D
     {
         if (Input.IsActionJustPressed("ui_accept"))
         {
-            nMode = (nMode + 1) % 3;
-            
-            switch (nMode)
-            {
-                case 1:
-                    mode = "Accelerate2";
-                    break;
-
-                case 2:
-                    mode = "Accelerate3";
-                    break;
-
-                default:
-                    mode = "Accelerate";
-                    break;
-            }
-
+            AccelerationMode = (AccelMode)((int)(AccelerationMode + 1) % 3);
             UpdateInfo();
         }
 
@@ -137,18 +123,20 @@ public class PlayerTopDown : KinematicBody2D
 
         if (v0 == Vector2.Zero && input == Vector2.Zero) return; // Stopped and no input, so bail
 
-        switch (nMode)
+        switch (AccelerationMode)
         {
-            case 1:
-                v0 = new Vector2(Accelerate2(v0.x, input.x, dt), Accelerate2(v0.y, input.y, dt)).Clamped(Speed);
+            case AccelMode.NoDrag:
+                v0 = AccelerateNoDrag(v0, input, dt);
                 break;
 
-            case 2:
-                v0 = Accelerate3(v0, input, dt);
+            case AccelMode.ExtDrag:
+                v0 = new Vector2(AccelerateExtDrag(v0.x, input.x, dt),
+                        AccelerateExtDrag(v0.y, input.y, dt)).Clamped(Speed);
                 break;
 
             default:
-                v0 = new Vector2(Accelerate(v0.x, input.x, dt), Accelerate(v0.y, input.y, dt)).Clamped(Speed);
+                v0 = new Vector2(AccelerateIntExtDrag(v0.x, input.x, dt),
+                        AccelerateIntExtDrag(v0.y, input.y, dt)).Clamped(Speed);
                 break;
         }
 
@@ -158,7 +146,7 @@ public class PlayerTopDown : KinematicBody2D
     }
 
     // Calculate speed using both external and internal drag to model top speed
-    private float Accelerate(float s0, float input, float dt)
+    private float AccelerateIntExtDrag(float s0, float input, float dt)
     {
         // Accelerating
         if (input > 0 && s0 >= 0 || input < 0 && s0 <= 0)
@@ -184,7 +172,7 @@ public class PlayerTopDown : KinematicBody2D
     }
 
     // Calculate speed using only external drag to model top speed
-    private float Accelerate2(float s0, float input, float dt)
+    private float AccelerateExtDrag(float s0, float input, float dt)
     {
         // Accelerating
         if (input > 0 && s0 >= 0 || input < 0 && s0 <= 0) return (float)Velocity(dt, s0, Acceleration * input, Drag);
@@ -207,7 +195,7 @@ public class PlayerTopDown : KinematicBody2D
     }
 
     // Calculate velocity with no drag and clamped to top speed
-    private Vector2 Accelerate3(Vector2 v0, Vector2 input, float dt)
+    private Vector2 AccelerateNoDrag(Vector2 v0, Vector2 input, float dt)
     {
         if (input != Vector2.Zero) return (v0 + input * Acceleration * dt).Clamped(Speed);
         return v0.MoveToward(Vector2.Zero, Friction * dt);
@@ -236,6 +224,7 @@ public class PlayerTopDown : KinematicBody2D
     {
         info.Text = String.Format("position: {0,8:F2}, {1,8:F2}\nvelocity: {2,8:F2}, {3,8:F2}\n   speed: {4,8:F2}\n" +
                 "a={5}, f={6}, d={7}+{8}\nmode: {9}",
-                Position.x, Position.y, v0.x, v0.y, v0.Length(), Acceleration, Friction, Drag, intDrag, mode);
+                Position.x, Position.y, v0.x, v0.y, v0.Length(), Acceleration, Friction, Drag, intDrag,
+                AccelerationMode);
     }
 }
