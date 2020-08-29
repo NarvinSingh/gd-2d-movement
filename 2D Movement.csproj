@@ -78,7 +78,6 @@
     <Compile Include="nodes\Carousel.cs" />
     <Compile Include="nodes\Graph.cs" />
     <Compile Include="lib\Kinematics.cs" />
-    <Compile Include="nodes\PolygonOutline2D.cs" />
     <Compile Include="characters\PlayerTopDown.cs" />
     <Compile Include="levels\TopDown.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
