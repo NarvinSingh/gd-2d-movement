@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using static System.Math;
 
 namespace Com.NarvinSingh.Test
@@ -8,6 +9,7 @@ namespace Com.NarvinSingh.Test
         public delegate double Fxy(double xi, double sum);
         private delegate bool IsSumReached();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEqual(double a, double b, double tolerance = 0.0001)
         {
             double delta = a - b;

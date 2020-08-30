@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Com.NarvinSingh.Test
 {
@@ -9,16 +10,19 @@ namespace Com.NarvinSingh.Test
         const BindingFlags SET_BINDINGS = DEFAULT_BINDINGS | BindingFlags.SetField | BindingFlags.SetProperty;
         const BindingFlags INVOKE_BINDINGS = DEFAULT_BINDINGS | BindingFlags.InvokeMethod;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Get(string name, object target)
         {
             return target.GetType().InvokeMember(name, GET_BINDINGS, null, target, null);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Set(string name, object target, object value)
         {
             target.GetType().InvokeMember(name, SET_BINDINGS, null, target, new object[] { value });
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Call(string name, object target, object[] args = null)
         {
             return target.GetType().InvokeMember(name, INVOKE_BINDINGS, null, target, args);

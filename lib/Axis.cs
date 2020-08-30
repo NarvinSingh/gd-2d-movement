@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using static System.Math;
 
 namespace Com.NarvinSingh.Graphing
@@ -116,6 +117,7 @@ namespace Com.NarvinSingh.Graphing
         }
 
         // Return a screen coordinate given a value on the axis
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float Map(float value)
         {
             if (!Inverted) return Start + (value - LowerExtent) * UnitLength;
@@ -123,6 +125,7 @@ namespace Com.NarvinSingh.Graphing
         }
 
         // Return a value on the axis given a screen coordinate
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float Unmap(float coord)
         {
             if (!Inverted) return LowerExtent + (coord - Start) * InverseUnitLength;

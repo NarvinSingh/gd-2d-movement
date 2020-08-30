@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Com.NarvinSingh.Physics
 {
@@ -9,6 +10,7 @@ namespace Com.NarvinSingh.Physics
         // dt = dv / (a - d * v^2)
         // t = arctan(sqrt(d / -a) * [v = 0]) / sqrt(-a * d) - arctan(sqrt(d / -a) * v0) / sqrt(-a * d)
         // t = -arctan(sqrt(d / -a) * v0) / sqrt(-a * d)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double TimeToStop(double v0, double a = 0, double d = 0)
         {
             if (d < 0) throw new ArgumentOutOfRangeException("d", "d must be greater than or equal to zero.");
@@ -18,7 +20,7 @@ namespace Com.NarvinSingh.Physics
             // Drag and acceleration
             if (a != 0 && d != 0)
             {
-                double absV0 =  v0 >= 0 ? v0 : -v0;
+                double absV0 = v0 >= 0 ? v0 : -v0;
                 double absA = a >= 0 ? a : -a;
 
                 // Accelaration, so return a negative time (in the past) when v was 0
@@ -46,6 +48,7 @@ namespace Com.NarvinSingh.Physics
         // arctan(sqrt(d / -a) * v) = arctan(sqrt(d / -a) * v0) + sqrt(-a * d)t
         // sqrt(d / -a) * v = tan(arctan(sqrt(d / -a) * v0) + sqrt(-a * d)t)
         // v = sqrt(-a / d) * tan(arctan(sqrt(d / -a) * v0) + sqrt(-a * d)t)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Velocity(double t, double v0 = 0, double a = 0, double d = 0)
         {
 
@@ -98,6 +101,7 @@ namespace Com.NarvinSingh.Physics
         // [dv = 0] = (a - d * v^2)dt
         // 0 = a - d * v^2
         // v = sqrt(a / d)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double TerminalVelocity(double a, double d)
         {
 

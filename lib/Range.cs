@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Com.NarvinSingh.Graphing
 {
@@ -58,6 +59,7 @@ namespace Com.NarvinSingh.Graphing
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Include(float value)
         {
             if (value < Min) Min = value;
