@@ -6,6 +6,10 @@ public class LibTest : Node
 {
     public override void _Ready()
     {
+        GD.Print(Summarize("AdjustmentTest.ItGetsSign", AdjustmentTest.ItGetsSign()));
+        GD.Print(Summarize("AdjustmentTest.ItAbsolutes", AdjustmentTest.ItAbsolutes()));
+        GD.Print(Summarize("AdjustmentTest.ItClamps", AdjustmentTest.ItClamps()));
+
         GD.Print(Summarize("ApproximateTest.ItCalculatesIsEqual", ApproximateTest.ItCalculatesIsEqual()));
         GD.Print(Summarize("ApproximateTest.ItReimannSums", ApproximateTest.ItReimannSums()));
         GD.Print(Summarize("ApproximateTest.ItReimannSumsTo", ApproximateTest.ItReimannSumsTo()));

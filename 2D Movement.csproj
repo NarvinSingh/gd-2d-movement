@@ -66,6 +66,7 @@
     <Compile Include="levels\GraphTest.cs" />
     <Compile Include="levels\LibTest.cs" />
     <Compile Include="levels\PlayerTopDownTest.cs" />
+    <Compile Include="lib\AdjustmentTest.cs" />
     <Compile Include="lib\PrivateAccess.cs" />
     <Compile Include="lib\ApproximateTest.cs" />
     <Compile Include="lib\Axis.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="lib\PrivateAccessTest.cs" />
     <Compile Include="lib\Range.cs" />
     <Compile Include="lib\RangeTest.cs" />
+    <Compile Include="lib\Adjustment.cs" />
     <Compile Include="nodes\Carousel.cs" />
     <Compile Include="nodes\Graph.cs" />
     <Compile Include="lib\Kinematics.cs" />
