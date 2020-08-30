@@ -17,6 +17,27 @@
             return value >= 0 ? 1 : -1;
         }
 
+        public static int Phase(int a, int b)
+        {
+            if (a == 0) return 0;
+            if ((a > 0 && b >= 0) || (a < 0 && b <= 0)) return 1;
+            return -1;
+        }
+
+        public static int Phase(float a, float b)
+        {
+            if (a == 0) return 0;
+            if ((a > 0 && b >= 0) || (a < 0 && b <= 0)) return 1;
+            return -1;
+        }
+
+        public static int Phase(double a, double b)
+        {
+            if (a == 0) return 0;
+            if ((a > 0 && b >= 0) || (a < 0 && b <= 0)) return 1;
+            return -1;
+        }
+
         public static int Absolute(int value)
         {
             return value >= 0 ? value : -value;
