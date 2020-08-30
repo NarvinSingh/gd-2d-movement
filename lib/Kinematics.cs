@@ -15,16 +15,14 @@ namespace Com.NarvinSingh.Physics
 
             if (v0 == 0) return 0;
 
-            int phase = (v0 >= 0 && a > 0) || (v0 <= 0 && a < 0) ? 1 : -1;
-
             // Drag and acceleration
             if (a != 0 && d != 0)
             {
-                double absV0 = Math.Abs(v0);
-                double absA = Math.Abs(a);
+                double absV0 =  v0 >= 0 ? v0 : -v0;
+                double absA = a >= 0 ? a : -a;
 
                 // Accelaration, so return a negative time (in the past) when v was 0
-                if (phase == 1)
+                if ((v0 >= 0 && a > 0) || (v0 <= 0 && a < 0))
                 {
                     // If v >= terminal velocity, it would have been accelerating since forever
                     if (absV0 >= TerminalVelocity(absA, d)) return double.NegativeInfinity;
@@ -61,13 +59,14 @@ namespace Com.NarvinSingh.Physics
 
             // Drag and acceleration
             int phase = (v0 >= 0 && a > 0) || (v0 <= 0 && a < 0) ? 1 : -1;
-            double absV0 = Math.Abs(v0);
-            double absA = Math.Abs(a);
+            double absV0 = v0 >= 0 ? v0 : -v0;
+            double absA = a >= 0 ? a : -a;
             double absV2 = absV0;
             double t2 = t;
-            int sign = v0 == 0 ?
-                    (int)(-absA / a) :
-                    v0 > 0 ? -phase : phase;
+            int sign;
+
+            if (v0 == 0) sign = a > 0 ? -1 : 1;
+            else sign = v0 > 0 ? -phase : phase;
 
             // Deceleration
             if (phase == -1)
