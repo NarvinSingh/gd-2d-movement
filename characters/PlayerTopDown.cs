@@ -172,32 +172,40 @@ public class PlayerTopDown : KinematicBody2D
 
     // Calculate speed with drag along one dimension
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private float Accelerate1D(float s0, float input, float totDrag, float extDrag, float dt)
+    private float Accelerate1D(float s0, float input, float intDrag, float extDrag, float dt)
     {
         if (s0 == 0 && input == 0) return 0; // Stopped and no input, so bail
 
+        if (intDrag == 0 && extDrag == 0) return Accelerate1D(s0, input, dt); // No drag, so return simple case
+        
+        float totDrag = intDrag + extDrag;
+
         // Accelerating
+        // When |i| = 1, the maximum top speed s_t is given by:
+        //     s_t = sqrt(a / d)
+        // When |i| < 1, the maximum top speed should be |i| * s_t and is given by:
+        //     |i| * s_t = sqrt(a_eff / d)
+        // solving for a_eff:
+        //     a = s_t^2 * d
+        //     a_eff = i^2 * s_t^2 * d
+        //           = i^2 * a
         if (Phase(input, s0) == 1) return (float)Velocity(dt, s0, Sign(input) * input * input * Acceleration, totDrag);
 
-        // Decelerating (either due to friction or accelerating in the other direction)
-        else if (Friction != 0 || input != 0)
-        {
-            float friction;
+        // Decelerating
+        float friction;
 
-            if (Friction != 0) friction = -Sign(s0) * Friction;
-            else friction = input * Acceleration;
+        // Due to friction (and drag)
+        if (Friction != 0) friction = -Sign(s0) * Friction;
+        // Due to acceleration in the opposite direction (and drag)
+        else friction = input * Acceleration;
 
-            float timeToStop = (float)TimeToStop(s0, friction, extDrag);
+        float timeToStop = (float)TimeToStop(s0, friction, extDrag);
 
-            // Not enough time to stop, so apply friction and drag for dt
-            if (timeToStop > dt) return (float)Velocity(dt, s0, friction, extDrag);
+        // Not enough time to stop, so apply friction and drag for dt
+        if (timeToStop > dt) return (float)Velocity(dt, s0, friction, extDrag);
 
-            // Enough time to stop, so apply acceleration and drag for remaining time
-            return (float)Velocity(dt - timeToStop, 0, Sign(input) * input * input * Acceleration, totDrag);
-        }
-
-        // Coasting (no friction)
-        return s0;
+        // Enough time to stop, so apply acceleration and drag for remaining time
+        return (float)Velocity(dt - timeToStop, 0, Sign(input) * input * input * Acceleration, totDrag);
     }
 
     // Calculate speed with no drag along one dimension
@@ -206,43 +214,42 @@ public class PlayerTopDown : KinematicBody2D
     {
         if (s0 == 0 && input == 0) return 0; // Stopped and no input, so bail
 
+        // Coasting
+        if (Friction == 0 && input == 0) return s0;
+
         // Accelerating
         if (Phase(input, s0) == 1) return (float)Velocity(dt, s0, input * Acceleration);
 
-        // Decelerating (either due to friction or accelerating in the other direction)
-        else if (Friction != 0 || input != 0)
-        {
-            float friction;
+        // Decelerating
+        float friction;
 
-            if (Friction != 0) friction = -Sign(s0) * Friction;
-            else friction = input * Acceleration;
+        // Due to friction
+        if (Friction != 0) friction = -Sign(s0) * Friction;
+        // Due to acceleration in the opposite direction
+        else friction = input * Acceleration;
 
-            float timeToStop = (float)TimeToStop(s0, friction);
+        float timeToStop = (float)TimeToStop(s0, friction);
 
-            // Not enough time to stop, so apply friction and drag for dt
-            if (timeToStop > dt) return (float)Velocity(dt, s0, friction);
+        // Not enough time to stop, so apply friction and drag for dt
+        if (timeToStop > dt) return (float)Velocity(dt, s0, friction);
 
-            // Enough time to stop, so apply acceleration and drag for remaining time
-            return (float)Velocity(dt - timeToStop, 0, input * Acceleration);
-        }
-
-        // Coasting (no friction)
-        return s0;
+        // Enough time to stop, so apply acceleration and drag for remaining time
+        return (float)Velocity(dt - timeToStop, 0, input * Acceleration);
     }
 
     // Calculate velocity using both external and internal drag to model top speed
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Vector2 AccelerateIntExtDrag(Vector2 v0, Vector2 input, float dt)
     {
-        return new Vector2(Accelerate1D(v0.x, input.x, internalDrag + Drag, Drag, dt),
-                Accelerate1D(v0.y, input.y, internalDrag + Drag, Drag, dt));
+        return new Vector2(Accelerate1D(v0.x, input.x, internalDrag, Drag, dt),
+                Accelerate1D(v0.y, input.y, internalDrag, Drag, dt));
     }
 
     // Calculate velocity using only external drag to model top speed
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Vector2 AccelerateExtDrag(Vector2 v0, Vector2 input, float dt)
     {
-        return new Vector2(Accelerate1D(v0.x, input.x, Drag, Drag, dt), Accelerate1D(v0.y, input.y, Drag, Drag, dt));
+        return new Vector2(Accelerate1D(v0.x, input.x, 0, Drag, dt), Accelerate1D(v0.y, input.y, 0, Drag, dt));
     }
 
     // Calculate velocity with no drag and clamped to top speed
