@@ -170,6 +170,31 @@ public class PlayerTopDown : KinematicBody2D
         ).Clamped(1);
     }
 
+    private Vector2 AdjustInputVector(Vector2 input, float dt)
+    {
+        if (Friction != 0) return input;
+
+        if (v0.x != 0 && input.x == 0 && Absolute(input.y) == 1)
+        {
+            int sign = Sign(v0.x);
+            float t = (float)TimeToStop(
+                    v0.x, -sign * 0.2 * Acceleration, AccelerationMode != AccelMode.NoDrag ? Drag : 0);
+
+            if (t >= dt) return new Vector2(sign * 0.2F, 0.8F * v0.y);
+
+            v0.x = 0;
+            v0.y = (float)Velocity(t, v0.y, 0.8F * input.y, Drag);
+            // dt = dt - t
+            return input; // 
+        }
+
+        if (v0.y != 0 && input.y == 0 && Absolute(input.x) == 1)
+        {
+        }
+
+        return new Vector2();
+    }
+
     // Calculate speed with drag along one dimension
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private float Accelerate1D(float s0, float input, float intDrag, float extDrag, float dt)

@@ -39,17 +39,17 @@ public class PlayerTopDownTest : Node
         AddChild(player);
         player.SetPhysicsProcess(false);
 
-        GD.Print(Summarize("PlayerTopDownTest.ItAcceleratesWithIntExtDrag", ItAcceleratesWithIntExtDrag()));
-        GD.Print(Summarize("PlayerTopDownTest.ItAcceleratesWithExtDrag", ItAcceleratesWithExtDrag()));
-        GD.Print(Summarize("PlayerTopDownTest.ItAcceleratesWithNoDrag", ItAcceleratesWithNoDrag()));
+        //GD.Print(Summarize("PlayerTopDownTest.ItAcceleratesWithIntExtDrag", ItAcceleratesWithIntExtDrag()));
+        //GD.Print(Summarize("PlayerTopDownTest.ItAcceleratesWithExtDrag", ItAcceleratesWithExtDrag()));
+        //GD.Print(Summarize("PlayerTopDownTest.ItAcceleratesWithNoDrag", ItAcceleratesWithNoDrag()));
 
         ResetPlayer(PlayerTopDown.AccelMode.IntExtDrag);
         player.SetPhysicsProcess(true);
 
         //player.SetPhysicsProcess(false);
-        //player.Friction = 0;
+        player.Friction = 0;
         //player.Drag = 0;
-        //PrivateAccess.Call("UpdateInfo", player);
+        PrivateAccess.Call("UpdateInfo", player);
         //ApplyInput(new string[] { "ui_up", "ui_right" }, new float[] { 1, 1 }, 8);
         //for (int i = 0; i < 60; i++)
         //{
